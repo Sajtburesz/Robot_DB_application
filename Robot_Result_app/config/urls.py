@@ -38,6 +38,8 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
 
     path("api/v1/", include("users.api.urls")),
+
+    # Keep it as last url entry
     re_path(r"^.*$", IndexTemplateView.as_view(), name="entry-point"),
 ]
 

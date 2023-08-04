@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -127,14 +128,18 @@ USE_TZ = True
 
 
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/api/v1/"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static/dist"),
+]
+    
 MEDIA_URL = "/media/"
 MEADIA_ROOT = "uploads"
 
@@ -154,7 +159,4 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 5,
 }
 
-# Vue - Django connection
-# VITE_BUILD_DIRNAME = "build"
-# VITE_STATIC_BUNDLE = BASE_DIR / f"static/{VITE_BUILD_DIRNAME}"
-# VITE_LIVE_SERVER = True
+
