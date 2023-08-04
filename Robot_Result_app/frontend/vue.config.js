@@ -8,7 +8,7 @@ module.exports = {
   pages: {
     index: {
       entry: "src/main.js",
-      title: "QuestionTime",
+      title: "Robot DB",
     },
   },
   devServer: {
