@@ -11,12 +11,13 @@ const routes = [
     path: '/api/v1/profile/',
     name: 'GetUserProfile',
     component: () => import('../views/GetUserProfileView.vue')
+  },
+  {
+    path: '/api/v1/profiles/sajtburesz/',
+    name: 'EditUserProfile',
+    component: () => import('../views/EditUserProfileView.vue'),
+    props: true,
   }
-  // {
-  //   path: '/profiles/:username',
-  //   name: 'UserProfile',
-  //   component: () => import('../views/UserProfileView.vue')
-  // }
   // {
   //   path: '/about',
   //   name: 'about',
