@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # Own Apps
     'users',
     'core',
+    'robot_test_management',
 
 
     #Third Party
