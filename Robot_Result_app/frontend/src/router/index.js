@@ -7,17 +7,22 @@ const routes = [
     name: 'home',
     component: HomeView
   },
-  {
-    path: '/api/v1/profile/',
-    name: 'GetUserProfile',
-    component: () => import('../views/GetUserProfileView.vue')
+    {
+    path: '/profile/',
+    name: 'RetreiveUpdateDestroyeProfileView',
+    component: () => import('../views/RetreiveUpdateDestroyProfileView.vue'),
+    props: true
   },
   {
-    path: '/api/v1/profiles/sajtburesz/',
-    name: 'EditUserProfile',
-    component: () => import('../views/EditUserProfileView.vue'),
-    props: true,
-  }
+    path: '/teams/list/',
+    name: 'ListTeamsView',
+    component: () => import('../views/ListTeamsView.vue'),
+  },
+  {
+    path: '/teams/creat-team/',
+    name: 'CreateTeamView',
+    component: () => import('../views/CreateTeamView.vue'),
+  },
   // {
   //   path: '/about',
   //   name: 'about',

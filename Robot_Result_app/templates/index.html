@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="">
   <head>
@@ -10,8 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300&display=swap" rel="stylesheet">
+    <link href="{% static 'css/custom_styles.css' %}" rel="stylesheet">
   <script defer src="http://127.0.0.1:8080/js/chunk-vendors.js"></script><script defer src="http://127.0.0.1:8080/js/index.js"></script></head>
-  <body>
+  <body class="bg-seasalt">
     <noscript>
       <strong>We're sorry but Robot DB doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>

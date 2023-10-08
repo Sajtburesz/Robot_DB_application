@@ -1,6 +1,6 @@
 <template>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-light bg-alice-blue">
     <!-- Container wrapper -->
     <div class="container-fluid">
       <!-- Toggle button -->
@@ -19,13 +19,13 @@
         <!-- Left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="#">Dashboard</a>
+            <a class="nav-link fw-bold" href="#">Dashboard</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Team</a>
+            <router-link class="nav-link fw-bold" :to="{name : 'CreateTeamView'}">Team</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Projects</a>
+            <a class="nav-link fw-bold" href="#">Projects</a>
           </li>
         </ul>
         <!-- Left links -->
@@ -42,7 +42,7 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
           <li>
-            <router-link class="dropdown-item" :to="{name : 'GetUserProfile'}">My profile</router-link>
+            <router-link class="dropdown-item" :to="{name : 'RetreiveUpdateDestroyeProfileView'}">My profile</router-link>
           </li>
           <li>
             <a class="dropdown-item" href="#">Settings</a>

@@ -35,10 +35,12 @@ urlpatterns = [
         ),
         name="django_registration_register",
     ),
-    # path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/", include("django.contrib.auth.urls")),
 
     path("api/v1/", include("users.api.urls")),
     path("api/v1/", include("robot_test_management.api.urls")),
+    path("api/v1/", include("teams.api.urls")),
+
 
     # Keep it as last url entry
     re_path(r"^.*$", IndexTemplateView.as_view(), name="entry-point"),

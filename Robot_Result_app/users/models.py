@@ -15,3 +15,8 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ["first_name","last_name","email"]
 
+    def owned_teams(self):
+        return self.owned_teams.all()
+    
+    def member_teams(self):
+        return self.teams.all()

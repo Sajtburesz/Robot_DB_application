@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'core',
     'robot_test_management',
+    'teams',
 
 
     #Third Party
@@ -62,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -135,10 +138,10 @@ LOGOUT_REDIRECT_URL = "/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static"
+    os.path.join(BASE_DIR, "static"),
 ]
     
 MEDIA_URL = "/media/"
