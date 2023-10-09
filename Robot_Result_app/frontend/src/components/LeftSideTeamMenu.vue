@@ -1,6 +1,6 @@
 <template>
     <div class="nav nav-pills flex-column mb-auto bg-seasalt">
-        <li class="nav-item m-1 p-1">
+        <li class="nav-item m-1 p-1 border-bottom">
             <router-link class="nav-link" :to="{name : 'CreateTeamView'}" active-class="active-link">
                 <span class="fw-bold" active-class="active-text">Create Team</span>
             </router-link>

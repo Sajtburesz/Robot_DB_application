@@ -8,10 +8,9 @@ const routes = [
     component: HomeView
   },
     {
-    path: '/profile/',
+    path: '/my-profile/',
     name: 'RetreiveUpdateDestroyeProfileView',
     component: () => import('../views/RetreiveUpdateDestroyProfileView.vue'),
-    props: true
   },
   {
     path: '/teams/list/',
@@ -22,6 +21,12 @@ const routes = [
     path: '/teams/creat-team/',
     name: 'CreateTeamView',
     component: () => import('../views/CreateTeamView.vue'),
+  },
+  {
+    path: '/manage-team/:teamId/',
+    name: 'RetreiveUpdateDestroyTeamView',
+    component: () => import('../views/RetreiveUpdateDestroyTeamView.vue'),
+    props: true,
   },
   // {
   //   path: '/about',

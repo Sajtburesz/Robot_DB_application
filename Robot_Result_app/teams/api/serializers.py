@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 class TeamSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required = True)
     owner = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    members = serializers.SlugRelatedField(slug_field='username', many=True, queryset=get_user_model().objects.all())
+    members = serializers.SlugRelatedField(slug_field='username', many=True, read_only=True)
 
     class Meta:
         model = Team
@@ -36,11 +36,14 @@ class TeamSerializer(serializers.ModelSerializer):
 
 class UserTeamSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
-
+    owner_name = serializers.SerializerMethodField()
     class Meta:
         model = Team
-        fields = ['id','name', 'is_owner']
+        fields = ['id','name','owner_name', 'is_owner']
 
     def get_is_owner(self, obj):
         user = self.context['request'].user
         return obj.owner == user
+    
+    def get_owner_name(self,obj):
+        return obj.owner.username
