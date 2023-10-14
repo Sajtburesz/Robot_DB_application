@@ -15,35 +15,58 @@
         <!-- Members List -->
         <div class="mt-5">
             <h2 class="d-inline-block">Members</h2>
-            <button class="btn btn-custom-light-sky-blue float-end" @click="showAddMember = !showAddMember">+</button>
-
-            <!-- Add Member Form -->
-            <div v-if="showAddMember">
-                <!-- Your form to add members goes here -->
-            </div>
+            <div class="float-end">
+    <!-- Button to open the search modal -->
+    <button class="btn btn-custom-light-sky-blue" @click="showModal = true">+</button>
+    <!-- Search Modal -->
+    <div v-if="showModal" class="modal"> 
+    <div class="modal-content">
+        <span @click="closeModal" class="close">&times;</span>
+        <UserSearchComponent v-on:set-users="setUsers" ></UserSearchComponent>
+        <ul>
+            <li v-for="user in querried_users" :key="user.username" >
+                {{ user.username }}
+                <span v-if="containsUsername(user.username)">User already in team</span>
+                <button v-else type="button" @click="addMember(user.username)">Add Member</button>
+            </li>
+        </ul> 
+        </div>
+    </div>
+</div>
+           
 
             <!-- Members -->
-            <div class="card" v-for="member in this.members" :key="member.id" @click="toggleMemberDetails(member)">
-                {{ member.username }}
-                <div v-if="member.showDetails">
-                    <button class="btn btn-danger">Remove from team</button>
+            <div class="col-2 w-100 p-1 m-1" v-for="member in this.members" :key="member.id">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 border-2">
+                    <span>{{ member.username }}</span>
+                    <button v-if="maintainer" class="btn btn-danger" @click="removeMember(member.username)">
+                         Remove from team
+                    </button>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </template>
   
 <script>
 import 'font-awesome/css/font-awesome.css'
 import { axios } from "@/common/api.service.js";
+import UserSearchComponent from "@/components/UserSearch.vue";
+
 export default {
+    components: {
+        UserSearchComponent
+    },
     data() {
         return {
             newTeamName: "",
             editingName: false,
-            showAddMember: false,
+            maintainer: true,
 
+            showModal: false,
+
+            querried_users: [],
             team: {},
             members: {},
         };
@@ -63,8 +86,8 @@ export default {
         this.team = response.data;
     },
     methods: {
-        toggleMemberDetails(member) {
-            member.showDetails = !member.showDetails;
+        containsUsername(usernameToCheck) {
+            return Object.values(this.members).some(member => member.username === usernameToCheck);
         },
         startEditingName() {
             this.editingName = true;
@@ -77,8 +100,60 @@ export default {
         },
         cancelEditingName() {
             this.editingName = false;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.querried_users = [];
+        },
+        setUsers(userQuery){
+            this.querried_users = userQuery;
+        },
+        async addMember(username) {
+            let obj = { members: [] };
+            obj.members.push(username);
+            const response = await axios.put("/api/v1/teams/" + this.$route.params.teamId + "/add-members/", obj);
+            this.members = response.data.members.map(member => {
+                return {
+                    username: member
+                }
+            });
+        },
+        async removeMember(username){
+            let obj = { members: [] };
+            obj.members.push(username);
+            await axios.put("/api/v1/teams/" + this.$route.params.teamId + "/remove-members/", obj);
+            this.members = this.members.filter(member => member.username !== username);
         }
     }
+    // TODO: Handle response codes with a popup warning and make sure saved elements don't change
 };
 </script>
   
+<style>
+/* Styles for the modal (simple example) */
+.modal {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 30%;
+  background-color: #fefefe;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>

@@ -1,10 +1,13 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, status
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from users.api.serializers import UserDetailSelfSerializer,UserListSerializer,UserDetailOtherSerializer,UserAvatarSerializer
 from users.models import User
 from teams.api.serializers import UserTeamSerializer
+from users.api.filters import UserFilter
 
 from rest_framework.response import Response
 from core.api.permissions import IsOwnerOrReadOnly
@@ -12,7 +15,8 @@ from core.api.permissions import IsOwnerOrReadOnly
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserListSerializer
-
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filterset_class = UserFilter
 
 class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -54,7 +58,7 @@ class UserTeamsListView(generics.ListAPIView):
         user = self.request.user
         owned_teams = user.owned_teams.all()
         member_teams_not_owned = user.member_teams().exclude(owner=user)
-        return (owned_teams | member_teams_not_owned).order_by('name').distinct()
+        return (owned_teams | member_teams_not_owned).order_by('id').distinct()
 
 class AvatarUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = UserAvatarSerializer

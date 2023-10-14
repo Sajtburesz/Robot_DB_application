@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from core.api.permissions import IsOwnerByPropertyOrReadOnly,IsTeamMember,IsOwnerOrAdmin
 
 from teams.models import Team
-from teams.api.serializers import TeamSerializer
+from teams.api.serializers import TeamSerializer,AddMembersSerializer,RemoveMembersSerializer
 
 
 class CreateTeamView(generics.CreateAPIView):
@@ -15,16 +15,24 @@ class CreateTeamView(generics.CreateAPIView):
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        team = serializer.save(owner=self.request.user)
-        team.members.add(self.request.user)
 
 
 class RetreiveUpdateDestroyTeamView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    lookup_field = 'pk'
     permission_classes = [IsAuthenticated,IsOwnerByPropertyOrReadOnly]
+
+
+class AddTeamMembersView(generics.UpdateAPIView):
+    queryset = Team.objects.all()
+    serializer_class = AddMembersSerializer
+    permission_classes = [IsAuthenticated, IsOwnerByPropertyOrReadOnly]
+    
+class RemoveTeamMembersView(generics.UpdateAPIView):
+    queryset = Team.objects.all()
+    serializer_class = RemoveMembersSerializer
+    permission_classes = [IsAuthenticated, IsOwnerByPropertyOrReadOnly]
+    
 
 
 class LeaveTeamView(APIView):

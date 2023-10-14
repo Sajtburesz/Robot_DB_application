@@ -18,7 +18,8 @@ class IsOwnerByPropertyOrReadOnly(permissions.BasePermission):
         if request.method == 'DELETE':
             return request.user.is_staff or request.user.is_superuser or obj.owner == request.user
 
-        return obj.owner == request.user or request.user in obj.owner_permissions.all()
+        return obj.owner == request.user 
+    # or request.user in obj.owner_permissions.all()
     
 class IsTeamMember(permissions.BasePermission):
     

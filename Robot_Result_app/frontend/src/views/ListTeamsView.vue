@@ -1,24 +1,36 @@
 <template>
-    <div class="d-flex justify-content-center vh-100">
-        <!-- Two-column layout: LeftSideMenu and TeamList -->
-        <div class="row bg-seasalt w-75">
+    <div class="vh-100 my-5">
+        <div class="container">
+            <!-- Two-column layout: LeftSideMenu and TeamList -->
+            <div class="row">
 
-            <!-- Left Side Menu -->
-            <div class="col-md-2 border-end">
-                <LeftSideTeamMenu></LeftSideTeamMenu>
-            </div>
+                <!-- Left Side Menu -->
+                <div class="col-md-2 border-end border-2">
+                    <LeftSideTeamMenu></LeftSideTeamMenu>
+                </div>
 
-            <!-- Team List -->
-            <div class="col-md-10 d-flex align-items-center">
-                <div class="w-100">
-                    <!-- Team Card Loop -->
-                    <div class="card mb-3 bg-light-sky-blue" v-for="team in teams" :key="team.id">
-                        <router-link :to="{name : 'RetreiveUpdateDestroyTeamView',params: { teamId: team.id }}">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ team.id }}. {{ team.name }}</h5>
-                                <p class="card-text">Owner: {{ team.owner_name}}</p>
-                            </div>
-                        </router-link>
+                <!-- Team List -->
+                <div class="col-md-10 d-flex align-items-center">
+                    <div class="w-100">
+                        <!-- Team Card Loop -->
+                        <div class="card mb-3 bg-light-sky-blue" v-for="team in teams" :key="team.id">
+                            <router-link :to="{ name: 'RetreiveUpdateDestroyTeamView', params: { teamId: team.id } }">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ team.id }}. {{ team.name }}</h5>
+                                    <p class="card-text">Owner: {{ team.owner_name }}</p>
+                                </div>
+                            </router-link>
+                        </div>
+                        <nav aria-label="...">
+                            <ul class="pagination">
+                                <li class="page-item" :class="{disabled : !this.prevUrl}">
+                                    <span class="page-link btn" @click="getPaginatedList(this.prevUrl)">Previous</span>
+                                </li>
+                                <li class="page-item" :class="{disabled : !this.nextUrl}">
+                                    <a class="page-link btn" @click="getPaginatedList(this.nextUrl)">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -37,26 +49,32 @@ export default {
     },
     data() {
         return {
-            teams: []
+            teams: [],
+            nextUrl: '',
+            prevUrl: '',
         };
     },
     async created() {
         let username = this.getCookie('username');
-        let allTeams = [];
 
-        let nextUrl = "/api/v1/users/" + username + "/teams/";
+        const response = await axios.get("/api/v1/users/" + username + "/teams/");
 
-        while (nextUrl) {
-            const response = await axios.get(nextUrl);
-            allTeams = allTeams.concat(response.data.results);
-            nextUrl = response.data.next;
-            console.log(response.data);
-        }
+        this.nextUrl = response.data.next;
+        this.prevUrl = response.data.previous;
 
-        this.teams = allTeams;
-        console.log(this.teams);
+        this.teams = response.data.results;
+
     },
     methods: {
+        async getPaginatedList(url) {
+
+            const response = await axios.get(url);
+
+            this.nextUrl = response.data.next;
+            this.prevUrl = response.data.previous;
+
+            this.teams = response.data.results;
+        },
         getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
