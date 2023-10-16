@@ -1,0 +1,151 @@
+{% extends "auth_layout.html" %}
+{% load widget_tweaks %}
+
+
+{% block content %}
+<div class="container-fluid vh-100 lg-bg-colour">
+  <div class="row">
+    <div class="col-sm-6 text-black d-flex flex-column justify-content-center align-items-center vh-100">
+
+      <div class="text-center mb-5" >
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Robot-framework-logo.png"
+          style="width: 150px;" alt="logo">
+        <h4 class="mt-1 mb-4 pb-1"><b>Robot DB - Share your results</b></h4>
+      </div>
+
+      <div class="justify-content-center align-items-center mx-auto">
+
+        <form method="POST">
+          {% csrf_token %}
+
+          <h3 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;"><b>Create an account</b></h3>
+
+          <!-- Username -->
+          <div class="form-floating mb-3">
+            {% render_field form.username class="form-control" id="floatingUsername" placeholder="Username" %}
+            <label for="floatingUsername" class="form-label">Username</label>
+            {% if form.username.errors %}
+            <div class="text-danger mt-2">
+              {% for error in form.username.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Email -->
+          <div class="form-floating mb-3">
+            {% render_field form.email class="form-control" id="floatingEmail" placeholder="Email address" %}
+            <label for="floatingEmail" class="form-label">Email address</label>
+            {% if form.email.errors %}
+            <div class="text-danger mt-2">
+              {% for error in form.email.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- First name -->
+          <div class="form-floating mb-3">
+            {% render_field form.first_name class="form-control" id="floatingFirstName" placeholder="First name" %}
+            <label for="floatingFirstName" class="form-label">First Name</label>
+            {% if form.first_name.errors %}
+            <div class="text-danger mt-2">
+              {% for error in form.first_name.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Last name -->
+          <div class="form-floating mb-3">
+            {% render_field form.last_name class="form-control" id="floatingLastName" placeholder="Last name" %}
+            <label for="floatingLastName" class="form-label">Last name</label>
+            {% if form.last_name.errors %}
+            <div class="text-danger mt-2">
+              {% for error in form.last_name.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Password1 -->
+          <div class="form-floating mb-3">
+            {% render_field form.password1 class="form-control" id="floatingPassword1" placeholder="Choose a password" aria-describedby="passwordHelpBlock" %}
+            <div id="passwordHelpBlock" class="form-text">
+              Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces.
+            </div>
+            <label for="floatingPassword1" class="form-label">Choose a password</label>
+            {% if form.password1.errors %}
+            <div class="text-danger mt-2 text-start">
+              {% for error in form.password1.errors %}
+              <li>{{ error }}</li>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Password2 -->
+          <div class="form-floating mb-3">
+            {% render_field form.password2 class="form-control" id="floatingPassword2" placeholder="Repeat your password" %}
+            <label for="floatingPassword2" class="form-label">Repeat your password</label>
+            {% if form.password2.errors %}
+            <div class="text-danger my-2 text-start">
+              {% for error in form.password2.errors %}
+              <li>{{ error }}</li>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+        <!-- End of form params -->
+          {% if form.errors %}
+          <div class="text-danger my-2">
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="container carpt-2 mb-3">
+            <div class="row justify-content-center align-items-center">
+              <div class="col text-center">
+                <div class="col">
+                  <p class="mb-0"><small>Already have an account?</small></p>
+                </div>
+                <div class="col">
+                  <button type="button" id="login-btn" class="btn btn-outline-primary btn-sm gradient-custom-2">Login</button>
+                </div>
+              </div>
+              <div class="col text-center align-self-end">
+                <button class="btn btn-primary btn-sm" type="submit">Register</button>
+              </div>
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+      <div class="col-sm-6 px-0 ">
+        <img src="https://images.unsplash.com/photo-1512850183-6d7990f42385?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGhpZ2glMjByZXMlMjB3YWxscGFwZXJ8ZW58MHx8MHx8fDA%3D&w=1000&q=80"
+          alt="Login image" class="w-100 vh-100" style="object-fit: cover; object-position: left;">
+      </div>
+</div>
+
+
+
+<script>
+  const registrationUrl = "{% url 'login' %}";
+  const button = document.getElementById('login-btn');
+
+  button.addEventListener('click', function() {
+    // Change the location to the generated URL
+    window.location.href = registrationUrl;
+  });
+</script>
+
+{% endblock %}
