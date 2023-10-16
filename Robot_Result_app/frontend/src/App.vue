@@ -26,7 +26,7 @@ export default {
         const response = await axios.get('/api/v1/check-admin-status/');
 
         let isAdmin = false;
-        if(response.data.is_superuser || response.data.is_staff){
+        if(response.data.is_superuser){
           isAdmin = true;
         }else{
           isAdmin = false;

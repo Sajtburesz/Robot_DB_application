@@ -38,14 +38,20 @@ class TeamSerializer(serializers.ModelSerializer):
             return False
 
     def create(self, validated_data):
-        # Set the request maker as the team's owner
+        # Get authenticated user
         owner = self.context['request'].user
         validated_data['owner'] = owner
         team = Team.objects.create(**validated_data)
         
-        # Add the owner to the team's members
+        # Add the owner
         TeamMembership.objects.create(team=team, user=owner)
         
+        # Add all admin users
+        admin_users = get_user_model().objects.filter(is_superuser=True)
+
+        for admin_user in admin_users:
+            TeamMembership.objects.create(team=team, user=admin_user)
+
         return team
 
     def update(self, instance, validated_data):
@@ -88,8 +94,8 @@ class RemoveMembersSerializer(serializers.ModelSerializer):
         members = validated_data.get('members', [])
 
         for user in members:
-            if user == instance.owner:
-                raise serializers.ValidationError(f"Owner {instance.owner} can't be removed from team.")
+            if user == instance.owner or user.is_superuser:
+                raise serializers.ValidationError(f"User {user} can't be removed from team. (Owner OR Admin)")
             if user in instance.members.all():
                 TeamMembership.objects.filter(team=instance, user=user).delete()
     

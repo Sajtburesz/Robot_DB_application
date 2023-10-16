@@ -79,5 +79,4 @@ class GetAdminStatusView(views.APIView):
     def get(self, request):
         return Response({
             'is_superuser': request.user.is_superuser,
-            'is_staff': request.user.is_staff
         })

@@ -50,8 +50,8 @@ class LeaveTeamView(APIView):
     def post(self, request, pk, *args, **kwargs):
         team = self.get_object(pk)
 
-        if request.user == team.owner:
-            return Response({"detail": "Owner can't leave the team"}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user == team.owner or request.user.is_superuser:
+            return Response({"detail": "Owner or Admin can't leave the team"}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in team.members.all():
             return Response({"message": "You are not a member of this team."}, status=status.HTTP_400_BAD_REQUEST)
