@@ -16,7 +16,7 @@
                         <div class="card mb-3 bg-light-sky-blue" v-for="team in teams" :key="team.id">
                             <router-link :to="{ name: 'RetreiveUpdateDestroyTeamView', params: { teamId: team.id } }">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ team.id }}. {{ team.name }}</h5>
+                                    <h5 class="card-title">Team: {{ team.name }}</h5>
                                     <p class="card-text">Owner: {{ team.owner_name }}</p>
                                 </div>
                             </router-link>

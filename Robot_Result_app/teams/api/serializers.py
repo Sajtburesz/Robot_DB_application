@@ -44,13 +44,13 @@ class TeamSerializer(serializers.ModelSerializer):
         team = Team.objects.create(**validated_data)
         
         # Add the owner
-        TeamMembership.objects.create(team=team, user=owner)
+        TeamMembership.objects.get_or_create(team=team, user=owner)
         
         # Add all admin users
         admin_users = get_user_model().objects.filter(is_superuser=True)
 
         for admin_user in admin_users:
-            TeamMembership.objects.create(team=team, user=admin_user)
+            TeamMembership.objects.get_or_create(team=team, user=admin_user)
 
         return team
 
@@ -75,7 +75,7 @@ class AddMembersSerializer(serializers.ModelSerializer):
 
         for user in members:
             if user not in instance.members.all():
-                TeamMembership.objects.create(team=instance, user=user)
+                TeamMembership.objects.get_or_create(team=instance, user=user)
         
         return instance
     
