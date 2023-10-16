@@ -1,6 +1,6 @@
 <template>
-    <div class="form-outline">
-        <input class="form-input" v-model="query" @input="fetchUsersDebounced" placeholder="Search users...">
+    <div>
+        <input v-model="query" @input="fetchUsersDebounced" placeholder="Search users...">
     </div>
 </template>
   
@@ -20,21 +20,18 @@ export default {
         fetchUsersDebounced() {
 
             clearTimeout(this.debounceTimeout);
-            if(this.query){
-                this.$emit('set-loading', true);
-                this.debounceTimeout = setTimeout(this.fetchUsers, 500);
-            }else {
+
+            this.debounceTimeout = setTimeout(this.fetchUsers, 300);
+        },
+        async fetchUsers() {
+            if (this.query) {
+                const response = await axios.get(`/api/v1/users/?username=${this.query}`);
+                this.users = response.data.results;
+                this.$emit('set-users', this.users);
+            } else {
                 this.users = [];
                 this.$emit('set-users', this.users);
             }
-        },
-        async fetchUsers() {
-        
-            const response = await axios.get(`/api/v1/users/?username=${this.query}`);
-            this.users = response.data.results;
-            this.$emit('set-users', this.users);
-
-            this.$emit('set-loading', false);
         },
     },
 };
