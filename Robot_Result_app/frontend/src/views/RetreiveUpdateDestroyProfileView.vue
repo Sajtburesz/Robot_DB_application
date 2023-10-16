@@ -62,7 +62,7 @@
                       </div>
                       <button type="submit" class="btn btn-primary me-2">Save</button> 
                       <!-- TODO: MAKE BUTTON UCLA BLUE COLOUR -->
-                      <button @click="cancelEdit" class="btn btn-secondary">Cancel</button>
+                      <button @click="cancelEdit" class="btn btn-secondary bg-ucla-blue">Cancel</button>
                     </form>
                   </div>
                 </div>
@@ -78,6 +78,7 @@
 
 <script>
 import { axios } from "@/common/api.service.js";
+import Cookies from "js-cookie";
 
 export default {
   data() {
@@ -89,7 +90,7 @@ export default {
   },
   async created() {
     try {
-      let loggedInUsername = this.getCookie('username');
+      let loggedInUsername = Cookies.get('username');
       const response = await axios.get('/api/v1/users/' + loggedInUsername +'/');
       this.user = response.data;
       this.editableUser = { ...this.user };  // Clone user data for editing
@@ -103,7 +104,7 @@ export default {
     },
     async updateProfile() {
       try {
-        let loggedInUsername = this.getCookie('username');
+        let loggedInUsername = Cookies.get('username');
         const response = await axios.put('/api/v1/users/' + loggedInUsername + "/", this.editableUser);
         this.user = response.data;
         this.editMode = false;
@@ -114,11 +115,6 @@ export default {
     cancelEdit() {
       this.editableUser = { ...this.user };  // Revert changes
       this.editMode = false;
-    },
-    getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
     },
   }
 };

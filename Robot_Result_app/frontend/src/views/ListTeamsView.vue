@@ -21,7 +21,7 @@
                                 </div>
                             </router-link>
                         </div>
-                        <nav aria-label="...">
+                        <nav aria-label="..." v-if="teams.length != 0">
                             <ul class="pagination">
                                 <li class="page-item" :class="{disabled : !this.prevUrl}">
                                     <span class="page-link btn" @click="getPaginatedList(this.prevUrl)">Previous</span>
