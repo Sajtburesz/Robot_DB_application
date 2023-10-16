@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics, status, views
+from rest_framework import generics, status
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -73,10 +73,4 @@ class AvatarUpdateView(generics.RetrieveUpdateAPIView):
     def delete(self, request, *args, **kwargs):
         return Response({"detail": "Deletion not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-class GetAdminStatusView(views.APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        return Response({
-            'is_superuser': request.user.is_superuser,
-        })
+    

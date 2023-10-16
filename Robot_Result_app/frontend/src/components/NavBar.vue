@@ -22,13 +22,10 @@
             <a class="nav-link fw-bold" href="#">Dashboard</a>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link fw-bold" :to="{ name: 'CreateTeamView' }">Team</router-link>
+            <router-link class="nav-link fw-bold" :to="{name : 'CreateTeamView'}">Team</router-link>
           </li>
           <li class="nav-item">
             <a class="nav-link fw-bold" href="#">Projects</a>
-          </li>
-          <li class="nav-item" v-if="isAdmin">
-                      <a class="nav-link fw-bold" href="#">Admin</a>
           </li>
         </ul>
         <!-- Left links -->
@@ -45,7 +42,7 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
           <li>
-            <router-link class="dropdown-item" :to="{ name: 'RetreiveUpdateDestroyeProfileView' }">My profile</router-link>
+            <router-link class="dropdown-item" :to="{name : 'RetreiveUpdateDestroyeProfileView'}">My profile</router-link>
           </li>
           <li>
             <a class="dropdown-item" href="#">Settings</a>
@@ -64,10 +61,5 @@
 <script>
 export default {
   name: "NavBarComponent",
-  computed: {
-    isAdmin() {
-      return this.$store.state.isAdmin;
-    }
-  }
 };
 </script>

@@ -1,57 +1,26 @@
 from rest_framework import serializers
-from teams.models import Team,TeamMembership
+from teams.models import Team
 from django.contrib.auth import get_user_model
 
-
-class TeamMemberSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
-    role = serializers.SerializerMethodField()
-
-    class Meta:
-        model = TeamMembership
-        fields = ['username', 'role']
-
-    def get_role(self, obj):
-        if obj.user == obj.team.owner:
-            return "Owner"
-        elif obj.is_maintainer:
-            return "Maintainer"
-        else:
-            return "Member"
 
 class TeamSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     owner = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    members = TeamMemberSerializer(source='teammembership_set', many=True, read_only=True)
-    is_maintainer = serializers.SerializerMethodField()
-
+    members = serializers.SlugRelatedField(slug_field='username', read_only=True, many=True)
+    
     class Meta:
         model = Team
-        fields = ['id', 'name', 'owner', 'members', 'is_maintainer']
-
-    def get_is_maintainer(self, obj):
-        try:
-            user = self.context['request'].user
-            membership = TeamMembership.objects.get(user=user, team=obj)
-            return membership.is_maintainer
-        except TeamMembership.DoesNotExist:
-            return False
+        fields = ['id', 'name', 'owner', 'members']
 
     def create(self, validated_data):
-        # Get authenticated user
+        # Set the request maker as the team's owner
         owner = self.context['request'].user
         validated_data['owner'] = owner
         team = Team.objects.create(**validated_data)
         
-        # Add the owner
-        TeamMembership.objects.create(team=team, user=owner)
+        # Add the owner to the team's members
+        team.members.add(owner)
         
-        # Add all admin users
-        admin_users = get_user_model().objects.filter(is_superuser=True)
-
-        for admin_user in admin_users:
-            TeamMembership.objects.create(team=team, user=admin_user)
-
         return team
 
     def update(self, instance, validated_data):
@@ -75,7 +44,7 @@ class AddMembersSerializer(serializers.ModelSerializer):
 
         for user in members:
             if user not in instance.members.all():
-                TeamMembership.objects.create(team=instance, user=user)
+                instance.members.add(user)
         
         return instance
     
@@ -94,17 +63,16 @@ class RemoveMembersSerializer(serializers.ModelSerializer):
         members = validated_data.get('members', [])
 
         for user in members:
-            if user == instance.owner or user.is_superuser:
-                raise serializers.ValidationError(f"User {user} can't be removed from team. (Owner OR Admin)")
+            if user == instance.owner:
+                raise serializers.ValidationError(f"Owner {instance.owner} can't be removed from team.")
             if user in instance.members.all():
-                TeamMembership.objects.filter(team=instance, user=user).delete()
+                instance.members.remove(user)
     
         return instance
 
 class UserTeamSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
     owner_name = serializers.SerializerMethodField()
-
     class Meta:
         model = Team
         fields = ['id','name','owner_name', 'is_owner']
@@ -117,11 +85,5 @@ class UserTeamSerializer(serializers.ModelSerializer):
         return obj.owner.username
     
 
-class RoleSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = TeamMembership
-        fields = ['username', 'is_maintainer']
 
 

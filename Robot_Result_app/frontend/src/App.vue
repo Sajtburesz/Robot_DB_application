@@ -1,49 +1,27 @@
 <template>
-  <div id="nav">
-    <NavBarComponent />
+  <div id="nav"> 
+     <NavBarComponent/>
   </div>
-  <router-view />
+  <router-view/>
 </template>
 
 <script>
-import NavBarComponent from "@/components/NavBar.vue";
+  import NavBarComponent from "@/components/NavBar.vue"
+  export default{
+    name: "App",
 
-import { axios } from "@/common/api.service.js";
+    components: {
+      NavBarComponent
+    },
 
-export default {
-  name: "App",
-
-  components: {
-    NavBarComponent
-  },
-  created() {
-    this.fetchAdminStatus();
-    this.intervalID = setInterval(this.fetchAdminStatus, 300000);
-  },
-  methods: {
-    async fetchAdminStatus() {
-      try {
-        const response = await axios.get('/api/v1/check-admin-status/');
-
-        let isAdmin = false;
-        if(response.data.is_superuser){
-          isAdmin = true;
-        }else{
-          isAdmin = false;
-        }
-        this.$store.dispatch('updateAdminStatus', isAdmin);
-      } catch (error) {
-        console.error("Error fetching admin status:", error);
-      }
-    }
   }
-
-}
 </script>
 
 <style>
-body {
-  font-family: 'Barlow Semi Condensed', sans-serif;
-  font-weight: 300;
-}
+
+  body{
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 300;
+  }
+
 </style>
