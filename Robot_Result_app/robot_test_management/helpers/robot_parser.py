@@ -1,50 +1,48 @@
 import xml.etree.ElementTree as ET
 
-def parse_robot_output(file_path):
-    # Dictionary to hold parsed data
-    suites = []
+def parse_robot_output(xml_file):
+    results = []
     current_suite = None
-    current_test = None
-
-    # Iterating through the XML elements as they're encountered
-    for event, elem in ET.iterparse(file_path, events=('start', 'end')):
-        if event == 'start':
-            if elem.tag == 'suite':
-                suite_name = elem.attrib.get('name', 'Unnamed Suite')
-                current_suite = {
-                    'name': suite_name,
-                    'tests': []
-                }
-            elif elem.tag == 'test':
-                test_name = elem.attrib.get('name', 'Unnamed Test')
-                current_test = {
-                    'name': test_name,
-                    'status': None,
-                    'keywords': []
-                }
-            elif elem.tag == 'kw':
-                keyword_name = elem.attrib.get('name', 'Unnamed Keyword')
-                current_keyword = {
-                    'name': keyword_name,
-                    'status': None
-                }
-                if current_test:  # Assuming keywords are always within tests
-                    current_test['keywords'].append(current_keyword)
-
-        if event == 'end':
-            if elem.tag == 'status':
-                if current_test and not current_test['status']:
-                    current_test['status'] = elem.attrib['status']
-                elif current_keyword and not current_keyword['status']:
-                    current_keyword['status'] = elem.attrib['status']
-            elif elem.tag == 'test':
-                current_suite['tests'].append(current_test)
-                current_test = None
-            elif elem.tag == 'suite':
-                suites.append(current_suite)
-                current_suite = None
-
-            # Clear the element from memory to keep memory usage low
+    
+    for event, elem in ET.iterparse(xml_file, events=('start', 'end')):
+        
+        # If we're starting a new suite
+        if event == 'start' and elem.tag == 'suite':
+            current_suite = {"name": elem.get("name"), "tests": []}
+            
+        # If we're ending a test
+        elif event == 'end' and elem.tag == 'test':
+            status_elem = elem.find('status')
+            testcase_data = {
+                'name': elem.get('name'),
+                'status': status_elem.get('status') if status_elem is not None else None,
+            }
+            
+            # If the test case has failed, extract the failed keywords
+            if testcase_data['status'] == 'FAIL':
+                testcase_data['keywords'] = []
+                for keyword in elem.findall('kw'):
+                    keyword_status_elem = keyword.find('status')
+                    if keyword_status_elem is not None and keyword_status_elem.get('status') == 'FAIL':
+                        keyword_data = {
+                            'name': keyword.get('name'),
+                            'status': keyword_status_elem.get('status'),
+                            'doc': keyword.get('doc'),
+                            'log_message': [msg.text for msg in keyword.findall('msg') if msg.text is not None]
+                        }
+                        testcase_data['keywords'].append(keyword_data)
+                
+            current_suite["tests"].append(testcase_data)
+                
+            # Clearing the element from memory
             elem.clear()
+        
+        # If we're ending a suite
+        elif event == 'end' and elem.tag == 'suite':
+            if current_suite and current_suite["tests"]:
+                results.append(current_suite)
+            current_suite = None
+    
+    return results
 
-    return suites
+

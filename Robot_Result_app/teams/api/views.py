@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
 from rest_framework.permissions import IsAuthenticated
-from core.api.permissions import IsOwnerByPropertyOrReadOnly,IsTeamMember,IsOwnerOrAdmin
+from core.api.permissions import IsTeamOwnerByPropertyOrReadOnly,IsTeamMember,IsOwnerOrAdmin
 
 from teams.models import Team,TeamMembership
 from teams.api.serializers import (TeamSerializer,
@@ -19,22 +19,21 @@ class CreateTeamView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-
 class RetreiveUpdateDestroyTeamView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated,IsOwnerByPropertyOrReadOnly,IsTeamMember]
+    permission_classes = [IsAuthenticated,IsTeamOwnerByPropertyOrReadOnly,IsTeamMember]
 
 
 class AddTeamMembersView(generics.UpdateAPIView):
     queryset = Team.objects.all()
     serializer_class = AddMembersSerializer
-    permission_classes = [IsAuthenticated, IsOwnerByPropertyOrReadOnly]
+    permission_classes = [IsAuthenticated, IsTeamOwnerByPropertyOrReadOnly]
     
 class RemoveTeamMembersView(generics.UpdateAPIView):
     queryset = Team.objects.all()
     serializer_class = RemoveMembersSerializer
-    permission_classes = [IsAuthenticated, IsOwnerByPropertyOrReadOnly]
+    permission_classes = [IsAuthenticated, IsTeamOwnerByPropertyOrReadOnly]
     
 
 
@@ -64,7 +63,7 @@ class LeaveTeamView(APIView):
 class UpdateRoleView(generics.UpdateAPIView):
     queryset = TeamMembership.objects.all()
     serializer_class = RoleSerializer
-    permission_classes = [IsAuthenticated, IsOwnerByPropertyOrReadOnly]
+    permission_classes = [IsAuthenticated, IsTeamOwnerByPropertyOrReadOnly]
 
 
     def update(self, request, *args, **kwargs):
