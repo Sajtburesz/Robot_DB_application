@@ -26,7 +26,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from robot_test_management.api.filters import TestRunFilter
 
 
-# Testrun Views
 class TestRunCreateView(generics.CreateAPIView):
     serializer_class = TestRunSerializer
     parser_classes = [MultiPartParser]
@@ -34,6 +33,7 @@ class TestRunCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
 
+# Testrun Views nonPublic
 class TestRunListView(generics.ListAPIView):
     serializer_class = TestRunListSerializer
 
@@ -75,6 +75,40 @@ class TestCaseRetreiveView(generics.RetrieveAPIView):
         team_id = self.kwargs['teampk']
         return TestCase.objects.filter(suite__test_run__team_id=team_id).prefetch_related('keywords')
 
+
+# Testrun Views Public
+class PublicTestRunListView(generics.ListCreateAPIView):
+    serializer_class = TestRunListSerializer
+
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TestRun.objects.filter(is_public=True)
+
+class PublicTestRunRetreiveView(generics.RetrieveAPIView):
+    serializer_class = TestRunDetailSerializer
+
+    permission_classes = [IsAuthenticated]
+    # TODO: Maybe add filtering option to nested suites?
+
+    def get_queryset(self):
+        return TestRun.objects.filter(is_public=True)
+    
+class PublicTestSuiteReteiveView(generics.RetrieveAPIView):
+    serializer_class = TestSuiteDetailSerializer
+
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TestSuite.objects.filter(test_run__is_public=True).prefetch_related('test_cases')
+
+class PublicTestCaseRetreiveView(generics.RetrieveAPIView):
+    serializer_class = TestCaseDetaileSerializer
+
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TestCase.objects.filter(suite__test_run__is_public=True).prefetch_related('keywords')
 
 # Attribute Views 
 class AttributeListView(generics.ListAPIView):

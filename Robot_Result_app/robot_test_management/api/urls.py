@@ -1,33 +1,33 @@
 from django.urls import path
-from robot_test_management.api.views import (AttributeCreateView, 
-                                             AttributeEditView,
-                                             AttributeListView, 
-                                             CommentListCreateView, 
-                                             CommentRetrieveUpdateDestroyView, 
-                                             TestCaseRetreiveView, 
-                                             TestRunRetreiveView, 
-                                             TestRunListView, 
-                                             TestRunCreateView,
-                                             TestSuiteReteiveView)
+from robot_test_management.api import views
 
 urlpatterns = [
     # Create TestRun
-    path('upload/', TestRunCreateView.as_view(), name='testrun_upload'),
+    path('upload/', views.TestRunCreateView.as_view(), name='testrun_upload'),
 
-    # Retreive Testrun
-    path('teams/<int:teampk>/test-runs/',TestRunListView.as_view(), name="testrun-list"),
-    path('teams/<int:teampk>/test-runs/<int:pk>/',TestRunRetreiveView.as_view(), name="testrun-instance"),
+    # Retreive Testrun nonPublic
+    path('teams/<int:teampk>/test-runs/',views.TestRunListView.as_view(), name="testrun-list"),
+    path('teams/<int:teampk>/test-runs/<int:pk>/',views.TestRunRetreiveView.as_view(), name="testrun-instance"),
 
-    path('teams/<int:teampk>/test-runs/<int:testrunpk>/<int:pk>/',TestSuiteReteiveView.as_view(), name="suite-instance"),
+    path('teams/<int:teampk>/test-runs/<int:testrunpk>/<int:pk>/',views.TestSuiteReteiveView.as_view(), name="suite-instance"),
 
-    path('teams/<int:teampk>/test-runs/<int:testrunpk>/<int:suitepk>/<int:pk>/',TestCaseRetreiveView.as_view(), name="testcase-instance"),
+    path('teams/<int:teampk>/test-runs/<int:testrunpk>/<int:suitepk>/<int:pk>/',views.TestCaseRetreiveView.as_view(), name="testcase-instance"),
+
+    # Retreive Testrun Public
+    path('teams/public/test-runs/',views.PublicTestRunListView.as_view(), name="testrun-list"),
+    path('teams/public/test-runs/<int:pk>/',views.PublicTestRunRetreiveView.as_view(), name="testrun-instance"),
+
+    path('teams/public/test-runs/<int:testrunpk>/<int:pk>/',views.PublicTestSuiteReteiveView.as_view(), name="suite-instance"),
+
+    path('teams/public/test-runs/<int:testrunpk>/<int:suitepk>/<int:pk>/',views.PublicTestCaseRetreiveView.as_view(), name="testcase-instance"),
 
     # Attribute
-    path('attributes/', AttributeListView.as_view(), name='attribute-list'),
-    path('attributes/create/', AttributeCreateView.as_view(), name='attributes-list-create'),
-    path('attributes/<int:pk>/', AttributeEditView.as_view(), name='attribute-key-edit'),
+    path('attributes/', views.AttributeListView.as_view(), name='attribute-list'),
+    path('attributes/create/', views.AttributeCreateView.as_view(), name='attributes-list-create'),
+    path('attributes/<int:pk>/', views.AttributeEditView.as_view(), name='attribute-key-edit'),
 
-    # Comment
-    path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/', CommentListCreateView.as_view(), name='comment-list-create'),
-    path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/<int:pk>/', CommentRetrieveUpdateDestroyView.as_view(), name='comment-detail'),
+    # Comment nonPublic
+    path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/', views.CommentListCreateView.as_view(), name='comment-list-create'),
+    path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/<int:pk>/', views.CommentRetrieveUpdateDestroyView.as_view(), name='comment-detail'),
+
 ]
