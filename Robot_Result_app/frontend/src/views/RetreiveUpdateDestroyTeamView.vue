@@ -235,7 +235,7 @@ export default {
                 this.editingName = false;
             } catch (error) {
                 this.$toast.error('You do not have permission to access this resource.', {
-                    duration: 5000,
+                    duration: 4000,
                 });
             }
         },

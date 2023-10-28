@@ -13,9 +13,9 @@
                 <div class="col-md-10 d-flex align-items-center">
                     <div class="w-100">
                         <!-- Team Card Loop -->
-                        <div class="card mb-3 bg-light-sky-blue" v-for="team in teams" :key="team.id">
+                        <div class="card mb-3 bg-light-sky-blue shadow rounded" v-for="team in teams" :key="team.id">
                             <router-link :to="{ name: 'RetreiveUpdateDestroyTeamView', params: { teamId: team.id } }">
-                                <div class="card-body">
+                                <div class="card-body ">
                                     <h5 class="card-title">Team: {{ team.name }}</h5>
                                     <p class="card-text">Owner: {{ team.owner_name }}</p>
                                 </div>

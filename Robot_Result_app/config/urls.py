@@ -21,9 +21,27 @@ from django_registration.backends.one_step.views import RegistrationView
 from users.forms import UserForm
 from core.views import IndexTemplateView
 
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Your API",
+      default_version='v1',
+      description="Test description",
+      terms_of_service="https://www.google.com/policies/terms/",
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
+    # TODO: Only include users/me and usrs/set_password!!
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.authtoken")),
 
@@ -41,6 +59,8 @@ urlpatterns = [
     path("api/v1/", include("robot_test_management.api.urls")),
     path("api/v1/", include("teams.api.urls")),
 
+    # doc
+    path('api/v1/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
     # Keep it as last url entry
     re_path(r"^.*$", IndexTemplateView.as_view(), name="entry-point"),

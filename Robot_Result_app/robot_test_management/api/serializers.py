@@ -188,8 +188,8 @@ class TestCaseDetaileSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')  # Display the username
+    author = serializers.ReadOnlyField(source='user.username')  # Display the username
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'testrun', 'text', 'created_at', 'updated_at']
+        fields = ['id', 'author', 'testrun', 'text', 'created_at', 'updated_at']

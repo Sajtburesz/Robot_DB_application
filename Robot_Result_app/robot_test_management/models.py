@@ -10,7 +10,7 @@ class Attributes(models.Model):
     
 class TestRun(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE,related_name='test_runs')
-    attributes = JSONField(blank=True,null=True)
+    attributes = JSONField(blank=True,null=False)
     is_public = models.BooleanField(default=False)
     class Meta:
         indexes = [GinIndex(fields=['attributes'])]
@@ -32,7 +32,7 @@ class Keyword(models.Model):
     test_case = models.ForeignKey(TestCase, on_delete=models.CASCADE, related_name='keywords')
 
 class Comment(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     testrun = models.ForeignKey(TestRun, related_name='comments', on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

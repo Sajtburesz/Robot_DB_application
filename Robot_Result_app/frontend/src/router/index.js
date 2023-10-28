@@ -28,6 +28,11 @@ const routes = [
     component: () => import('../views/RetreiveUpdateDestroyTeamView.vue'),
     props: true,
   },
+  {
+    path: '/test-runs/create/',
+    name: 'CreateTestRunView',
+    component: () => import('../views/CreateTestRunView.vue'),
+  },
   // {
   //   path: '/about',
   //   name: 'about',

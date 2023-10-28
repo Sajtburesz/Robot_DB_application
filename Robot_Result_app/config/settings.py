@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_registration",
     "djoser",
-    "django_filters"
+    "django_filters",
+    "drf_yasg",
     
 ]
 
@@ -169,3 +170,4 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 10,
 }
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
