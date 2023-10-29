@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, generics
+from django.db.models import Count
 
 from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin
 
@@ -171,3 +172,17 @@ class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam, IsCommentAuthorOrAdmin]
+
+
+# Dashboard statistics
+
+class TopFailingTestCasesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, teampk):
+        failing_testcases = TestCase.objects.filter(
+            suite__test_run__team_id=teampk, status="FAIL"
+        ).values("name").annotate(
+            failure_count=Count('id')
+        ).order_by('-failure_count')[:5]
+        return Response(failing_testcases)

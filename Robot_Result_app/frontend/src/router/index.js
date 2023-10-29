@@ -33,14 +33,16 @@ const routes = [
     name: 'CreateTestRunView',
     component: () => import('../views/CreateTestRunView.vue'),
   },
-  // {
-  //   path: '/about',
-  //   name: 'about',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  // }
+  {
+    path: '/test-runs/list/',
+    name: 'ListTestRunsView',
+    component: () => import('../views/ListTestRunsView.vue'),
+  },
+  {
+    path: '/test-runs/:teamId/:testRunId',
+    name: 'TestRunView',
+    component: () => import('../views/TestRunView.vue'),
+  },
 ]
 
 const router = createRouter({

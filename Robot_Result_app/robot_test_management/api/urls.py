@@ -30,4 +30,7 @@ urlpatterns = [
     path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/', views.CommentListCreateView.as_view(), name='comment-list-create'),
     path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/<int:pk>/', views.CommentRetrieveUpdateDestroyView.as_view(), name='comment-detail'),
 
+    # Statistics
+    path('top-failing-testcases/<int:teampk>/', views.TopFailingTestCasesView.as_view())
+
 ]

@@ -19,7 +19,7 @@
         <!-- Left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link fw-bold" href="#">Dashboard</a>
+            <router-link class="nav-link fw-bold" :to="{ name: 'ListTestRunsView' }">Test Runs</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link fw-bold" :to="{ name: 'CreateTeamView' }">Team</router-link>
