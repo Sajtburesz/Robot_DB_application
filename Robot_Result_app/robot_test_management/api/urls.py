@@ -31,6 +31,13 @@ urlpatterns = [
     path('teams/<int:teampk>/test-runs/<int:testrunpk>/comments/<int:pk>/', views.CommentRetrieveUpdateDestroyView.as_view(), name='comment-detail'),
 
     # Statistics
-    path('top-failing-testcases/<int:teampk>/', views.TopFailingTestCasesView.as_view())
+    path('top-failing-testcases/<int:teampk>/', views.TopFailingTestCasesView.as_view(), name='top-failing-tcs'),
+    path('date-range/<int:teampk>/', views.DateRangeView.as_view(), name='date-range'),
+    path('treemap-data/<int:teampk>/', views.TreemapDataView.as_view(), name='treemap-data'),
+    path('timeline-data/<int:teampk>/', views.TimelineDataView.as_view(), name='timeline-data'),
+    path('duration-heatmap/<int:teampk>/', views.TestCaseDurationHeatmapData.as_view(), name='testcase-duration-heatmap-data'),
+
+    # Helper
+    path('suite-names/<int:teampk>/', views.SuiteNames.as_view(), name='suite-names'),
 
 ]

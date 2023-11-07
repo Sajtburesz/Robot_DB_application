@@ -58,14 +58,14 @@ class TestRunSerializer(serializers.ModelSerializer):
         
         if isinstance(file_obj, InMemoryUploadedFile):
             # Read the file content directly
-            parsed_data = parse_robot_output(file_obj)
+            parsed_data, executed_at = parse_robot_output(file_obj)
         else:
             # Use the temporary file path for larger files
-            parsed_data = parse_robot_output(file_obj.temporary_file_path())
+            parsed_data, executed_at = parse_robot_output(file_obj.temporary_file_path())
 
         # Start the transaction block
         with transaction.atomic():
-            test_run = TestRun.objects.create(**validated_data)
+            test_run = TestRun.objects.create(**validated_data, executed_at=executed_at)
 
             suites_to_create = []
             for suite_data in parsed_data:
@@ -149,7 +149,7 @@ class TestRunDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestRun
-        fields = ['id', 'attributes', 'team','suites']
+        fields = ['id', 'attributes', 'team','suites','executed_at']
 
     def get_suites(self, obj):
         paginator = PaginatedTestSuiteSerializer()
@@ -182,7 +182,7 @@ class TestCaseDetaileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestCase
-        fields = ['id', 'name','status', 'keywords']
+        fields = ['id', 'name','status','duration', 'keywords']
 
 # Comment serializer
 

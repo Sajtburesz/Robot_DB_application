@@ -1,32 +1,70 @@
 <template>
-    <div>
-        <select v-model="selectedTeam" @change="fetchFailingTestcases">
-            <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
-        </select>
-
-        <div v-if="loading">
-            Loading...
+    <div class="container py-3 ">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="team-select" class="form-label text-ucla-blue">Team:</label>
+                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam" @change="fetchFailingTestcases">
+                    <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
+                </select>
+            </div>
         </div>
 
-        <canvas ref="chart"></canvas>
+        <div class="row">
+            <div class="col">
+                <apexchart v-if="loaded" type="bar" :options="chartOptions" :series="series"></apexchart>
+            </div>
+        </div>
     </div>
 </template>
-  
+
 <script>
-import { ref, onMounted, nextTick } from 'vue';
-import { Chart, BarController, LinearScale, CategoryScale, BarElement } from 'chart.js';
 import { axios } from "@/common/api.service.js";
+import VueApexCharts from 'vue3-apexcharts';
 
-Chart.register(BarController, LinearScale, CategoryScale, BarElement);
 export default {
-    name: 'TestCaseFailureChart',
-    setup() {
-        const chart = ref(null);
-        const selectedTeam = ref(null);
-        const teams = ref([]);
-        const loading = ref(true);
-
-        const fetchUserTeams = async () => {
+    name: "TestCaseFailureChart",
+    components: {
+        apexchart: VueApexCharts,
+    },
+    data() {
+        return {
+            loaded: false,
+            chartOptions: {
+                chart: {
+                    id: 'top-failing-test-cases',
+                    type: 'bar',
+                },
+                xaxis: {
+                    categories: []
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                title: {
+                    text: 'Top Failing Test Cases'
+                },
+            },
+            series: [
+                {
+                    name: 'Failures',
+                    data: []
+                }
+            ],
+            teams: [],
+            selectedTeam: null
+        };
+    },
+    async mounted() {
+        await this.fetchTeams();
+        await this.fetchFailingTestcases();
+    },
+    methods: {
+        async fetchTeams() {
             try {
                 const user = await axios.get('/auth/users/me/');
                 let url = '/api/v1/users/' + user.data.username + '/teams/';
@@ -36,64 +74,24 @@ export default {
                     allTeams = allTeams.concat(response.data.results.map(team => ({ id: team.id, name: team.name })));
                     url = response.data.next;
                 }
-                teams.value = allTeams;
-                selectedTeam.value = teams.value[0]?.id;
-                fetchFailingTestcases();
+                this.teams = allTeams;
+                this.selectedTeam = this.teams[0]?.id;
             } catch (error) {
                 console.error("Error fetching user teams:", error);
             }
-        };
-
-        const fetchFailingTestcases = async () => {
-            loading.value = true;
-            try {
-                const response = await axios.get(`/api/v1/top-failing-testcases/${selectedTeam.value}/`);
-                await nextTick();  // Ensure DOM updates
-                renderChart(response.data);
-            } catch (error) {
-                console.error("Error fetching failing test cases:", error);
-            } finally {
-                loading.value = false;
-            }
-        };
-
-        const renderChart = (data) => {
-            const names = data.map(item => item.name);
-            const failure_counts = data.map(item => item.failure_count);
-
-            const ctx = chart.value ? chart.value.getContext('2d') : null;
-
-            if (chart.value && typeof chart.value.destroy === 'function') {
-                chart.value.destroy();
-                chart.value = null;
-            }
-
-            chart.value = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: names,
-                    datasets: [{
-                        label: 'Failure Count',
-                        data: failure_counts,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+        },
+        async fetchFailingTestcases() {
+            if (this.selectedTeam) {
+                try {
+                    const response = await axios.get(`/api/v1/top-failing-testcases/${this.selectedTeam}/`);
+                    this.series[0].data = response.data.map(item => item.failure_count);
+                    this.chartOptions.xaxis.categories = response.data.map(item => item.name);
+                    this.loaded = true;
+                } catch (error) {
+                    console.error("Error fetching failing test cases:", error);
                 }
-            });
-        };
-
-        onMounted(fetchUserTeams);
-
-        return { chart, teams, selectedTeam, loading, fetchFailingTestcases };
+            }
+        }
     }
 };
 </script>

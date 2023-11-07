@@ -1,7 +1,13 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, generics
-from django.db.models import Count
+from django.db.models import (Count,
+                                Max,
+                                Min,
+                                Q,
+                                F,
+                                Avg,)
+from django.db.models.functions import TruncDay
 
 from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin
 
@@ -26,6 +32,7 @@ from robot_test_management.helpers import db_functions as db
 from django_filters.rest_framework import DjangoFilterBackend
 from robot_test_management.api.filters import TestRunFilter
 
+from datetime import datetime
 
 class TestRunCreateView(generics.CreateAPIView):
     serializer_class = TestRunSerializer
@@ -186,3 +193,139 @@ class TopFailingTestCasesView(APIView):
             failure_count=Count('id')
         ).order_by('-failure_count')[:5]
         return Response(failing_testcases)
+
+class DateRangeView(APIView):
+    def get(self, request, teampk, format=None):
+        date_range = TestRun.objects.filter(team_id=teampk).aggregate(
+            min_date=Min('executed_at'),
+            max_date=Max('executed_at')
+        )
+        return Response(date_range, status=status.HTTP_200_OK)
+
+class TreemapDataView(APIView):
+    def get(self, request, teampk, format=None):
+        start_date = request.query_params.get('start_date')
+        suites_aggregated = TestCase.objects.filter(
+            suite__test_run__team_id=teampk
+        ).values(
+            'suite__name'
+        ).annotate(
+            total_cases=Count('name', distinct=True), 
+            failed_cases=Count('id', filter=Q(status='FAIL'))
+        )
+        if start_date:
+            suites_aggregated = suites_aggregated.filter(suite__test_run__executed_at__gte=start_date)
+
+        heatmap_data = [
+            {
+                'suite_name': suite['suite__name'],
+                'total_cases': suite['total_cases'],
+                'failed_cases': suite['failed_cases']
+            }
+            for suite in suites_aggregated
+        ]
+        return Response(heatmap_data, status=status.HTTP_200_OK)
+
+
+class TimelineDataView(APIView):
+    def get(self, request, teampk, format=None):
+        start_date = request.query_params.get('start_date')
+        suite_filter = request.query_params.get('suite_filter', '')
+
+        # Query to get the test cases and their failure periods
+        test_case_runs = TestCase.objects.filter(
+            suite__test_run__team_id=teampk,
+            suite__name__icontains=suite_filter,
+            status='FAIL'
+        ).order_by('name', 'suite__test_run__executed_at').values(
+            'name',
+            executed_at=F('suite__test_run__executed_at')
+        )
+        if start_date:
+            test_case_runs = test_case_runs.filter(suite__test_run__executed_at__gte=start_date)
+
+        # Group by test case name and create the timeline data
+        timeline_data = {}
+        for run in test_case_runs:
+            test_case_name = run['name']
+            if test_case_name not in timeline_data:
+                timeline_data[test_case_name] = {
+                    'test_case_name': test_case_name,
+                    'fail_periods': []
+                }
+
+            # Add periods of failure
+            if not timeline_data[test_case_name]['fail_periods'] or \
+                    timeline_data[test_case_name]['fail_periods'][-1]['end'] != run['executed_at']:
+                timeline_data[test_case_name]['fail_periods'].append({
+                    'start': run['executed_at'],
+                    'end': run['executed_at']
+                })
+            else:
+                # Extend the current failure period
+                timeline_data[test_case_name]['fail_periods'][-1]['end'] = run['executed_at']
+
+        # Convert to list and remove test cases with no failures
+        timeline_data = [data for data in timeline_data.values() if data['fail_periods']]
+
+        return Response(timeline_data, status=status.HTTP_200_OK)
+
+class TestCaseDurationHeatmapData(APIView):
+  def post(self, request, teampk):
+        # Retrieve suite name and date from the request data
+        suite_name = request.data.get('suite_name')
+        date_str = request.data.get('date')  # Expected format: "YYYY-MM"
+        
+        if not suite_name or not date_str:
+            return Response({'error': 'Suite name and date are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Parse the date and calculate the first day of the given month and the first day of the next month
+        year, month = map(int, date_str.split('-'))
+        first_day_of_month = datetime(year, month, 1)
+        if month == 12:
+            first_day_of_next_month = datetime(year + 1, 1, 1)
+        else:
+            first_day_of_next_month = datetime(year, month + 1, 1)
+        
+        # Filter test cases by the provided team pk, suite name, and date range
+        test_cases = TestCase.objects.filter(
+            suite__name=suite_name,
+            suite__test_run__team__pk=teampk,
+            suite__test_run__executed_at__gte=first_day_of_month,
+            suite__test_run__executed_at__lt=first_day_of_next_month
+        )
+        
+        # Get the list of unique testcases in the suite
+        testcase_names = test_cases.values_list('name', flat=True).distinct()
+        
+        # Prepare the heatmap data for each testcase
+        heatmap_data = []
+        for testcase_name in testcase_names:
+            # Filter test cases for the specific testcase name
+            testcase_runs = test_cases.filter(name=testcase_name)
+            
+            # Calculate the average duration of the testcase across all runs
+            overall_average_duration = testcase_runs.aggregate(Avg('duration'))['duration__avg']
+            
+            # Aggregate average test case durations by day for the given month
+            daily_averages = (
+                testcase_runs
+                .annotate(day=TruncDay('suite__test_run__executed_at'))
+                .values('day')
+                .annotate(average_duration=Avg('duration'))
+                .order_by('day')
+            )
+            
+            # Append the data to the heatmap_data list
+            heatmap_data.append({
+                'testcase_name': testcase_name,
+                'overall_average_duration': overall_average_duration,
+                'daily_averages': list(daily_averages)
+            })
+        
+        return Response(heatmap_data)
+
+# Helper 
+class SuiteNames(APIView):
+    def get(self, request, teampk):
+        return Response(TestSuite.objects.filter(test_run__team_id=teampk).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)

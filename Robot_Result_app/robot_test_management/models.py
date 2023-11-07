@@ -12,8 +12,10 @@ class TestRun(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE,related_name='test_runs')
     attributes = JSONField(blank=True,null=False)
     is_public = models.BooleanField(default=False)
+    executed_at = models.DateTimeField(null=True, blank=True,db_index=True)
     class Meta:
         indexes = [GinIndex(fields=['attributes'])]
+        ordering = ['-executed_at']
 
 class TestSuite(models.Model):
     name = models.CharField(max_length=255)
@@ -22,6 +24,7 @@ class TestSuite(models.Model):
 class TestCase(models.Model):
     name = models.CharField(max_length=255)
     status = models.CharField(max_length=10, null=True, blank=True)
+    duration = models.FloatField(null=True, blank=True)
     suite = models.ForeignKey(TestSuite, on_delete=models.CASCADE,related_name='test_cases')
 
 class Keyword(models.Model):
