@@ -3,25 +3,29 @@
         <div class="row mb-3">
             <div class="col-md-4">
                 <label for="team-select" class="form-label text-ucla-blue">Team:</label>
-                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam" @change="fetchDateRange">
+                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam"
+                    @change="fetchDateRange">
                     <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
                 </select>
             </div>
 
             <div class="col-md-4">
                 <label for="start-date" class="form-label text-ucla-blue">Start Date:</label>
-                <input id="start-date" type="date" class="form-control bg-seasalt text-jet" v-model="startDate" :min="this.minDate" :max="this.maxDate" @change="fetchTimelineData">
+                <input id="start-date" type="date" class="form-control bg-seasalt text-jet" v-model="startDate"
+                    :min="this.minDate" :max="this.maxDate" @change="fetchTimelineData">
             </div>
 
             <div class="col-md-4">
                 <label for="suite-filter" class="form-label text-ucla-blue">Suite Filter:</label>
-                <input id="suite-filter" type="text" class="form-control bg-seasalt text-jet" v-model="suiteFilter" placeholder="Filter by suite name" @input="fetchTimelineData">
+                <input id="suite-filter" type="text" class="form-control bg-seasalt text-jet" v-model="suiteFilter"
+                    placeholder="Filter by suite name" @input="fetchTimelineData">
             </div>
         </div>
 
         <div class="row">
             <div class="col vh-100 overflow-auto">
-                <apexchart v-if="loaded" type="rangeBar" :options="chartOptions" ref="myChart" :series="rawSeries"></apexchart>
+                <apexchart v-if="loaded" type="rangeBar" :options="chartOptions" ref="myChart" :series="rawSeries">
+                </apexchart>
             </div>
         </div>
     </div>
@@ -49,7 +53,7 @@ export default {
             chartOptions: {
                 chart: {
                     type: 'rangeBar',
-                    height: 350,
+                    height: 'auto',
                     toolbar: {
                         show: true,
                         tools: {
@@ -64,18 +68,21 @@ export default {
                         autoSelected: 'zoom'
                     },
                 },
+                colors: ['#3a6f8fff'],
                 plotOptions: {
                     bar: {
                         horizontal: true,
-                        barHeight: '100%', // Adjust this value as needed
+                        barHeight: '90%', // Adjust this value as needed
                     }
                 },
                 xaxis: {
                     type: 'datetime',
-                    tickAmount: 10,
-                },  
+                    tickamount: 10,
+                },
                 stroke: {
-                    width: 1
+                    show: true,
+                    width: 1, // Width of the stroke line
+                    colors: ['#333333ff'], // Color of the stroke, here it's set to white for contrast
                 },
                 yaxis: {
                     labels: {
@@ -96,7 +103,7 @@ export default {
                     text: 'Test Case Fail Periods',
                     align: 'center',
                 },
-                
+
             },
             teams: [],
             selectedTeam: null,
@@ -189,9 +196,3 @@ export default {
 };
 </script>
 
-
-<style>
-    .chart-container {
-    max-height: 700px; /* Fixed maximum height for the container */
-    }
-</style>

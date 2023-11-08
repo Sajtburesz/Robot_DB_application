@@ -1,15 +1,26 @@
 <template>
-    <div>
-        <!-- Dropdown for team selection -->
-        <select v-model="selectedTeam" @change="fetchDateRange">
-            <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
-        </select>
-        <!-- Date Select -->
-        <input type="date" v-model="startDate" :min="this.minDate" :max="this.maxDate" @change="fetchTreemapData">
-        <apexchart v-if="loaded" type="treemap" :options="chartOptions" :series="series"></apexchart>
+    <div class="container py-3">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="team-select" class="form-label text-ucla-blue">Team:</label>
+                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam" @change="fetchDateRange">
+                    <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="start-date" class="form-label text-ucla-blue">Start Date:</label>
+                <input id="start-date" type="date" class="form-control bg-seasalt text-jet" v-model="startDate" :min="this.minDate" :max="this.maxDate" @change="fetchTreemapData">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <apexchart v-if="loaded" type="treemap" :options="chartOptions" :series="series"></apexchart>
+            </div>
+        </div>
     </div>
 </template>
-  
+
 <script>
 import { axios } from "@/common/api.service.js";
 import VueApexCharts from 'vue3-apexcharts';
@@ -112,4 +123,3 @@ export default {
     }
 };
 </script>
-

@@ -241,6 +241,7 @@ class TimelineDataView(APIView):
             'name',
             executed_at=F('suite__test_run__executed_at')
         )
+
         if start_date:
             test_case_runs = test_case_runs.filter(suite__test_run__executed_at__gte=start_date)
 
@@ -248,22 +249,32 @@ class TimelineDataView(APIView):
         timeline_data = {}
         for run in test_case_runs:
             test_case_name = run['name']
+            executed_at = run['executed_at']
+
+            # Check if this is the first time we see this test case fail
             if test_case_name not in timeline_data:
                 timeline_data[test_case_name] = {
                     'test_case_name': test_case_name,
-                    'fail_periods': []
+                    'fail_periods': [{
+                        'start': executed_at,
+                        'end': executed_at
+                    }]
                 }
-
-            # Add periods of failure
-            if not timeline_data[test_case_name]['fail_periods'] or \
-                    timeline_data[test_case_name]['fail_periods'][-1]['end'] != run['executed_at']:
-                timeline_data[test_case_name]['fail_periods'].append({
-                    'start': run['executed_at'],
-                    'end': run['executed_at']
-                })
             else:
-                # Extend the current failure period
-                timeline_data[test_case_name]['fail_periods'][-1]['end'] = run['executed_at']
+                # Get the last period of failure for the test case
+                last_period = timeline_data[test_case_name]['fail_periods'][-1]
+                last_fail_date = last_period['end'].date()
+
+                # Check if the current failure is consecutive (next day) to the last failure
+                if (executed_at.date() - last_fail_date).days == 1:
+                    # It is a consecutive failure, extend the end of the last period
+                    last_period['end'] = executed_at
+                elif (executed_at.date() - last_fail_date).days > 1:
+                    # There was at least a day without failures, start a new period
+                    timeline_data[test_case_name]['fail_periods'].append({
+                        'start': executed_at,
+                        'end': executed_at
+                    })
 
         # Convert to list and remove test cases with no failures
         timeline_data = [data for data in timeline_data.values() if data['fail_periods']]

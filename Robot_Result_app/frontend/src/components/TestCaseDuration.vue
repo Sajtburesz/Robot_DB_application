@@ -3,7 +3,8 @@
         <div class="row mb-3">
             <div class="col-md-3">
                 <label for="team-select" class="form-label text-ucla-blue">Team:</label>
-                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam" @change="fetchSuites()">
+                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam"
+                    @change="fetchDateRange()">
                     <option v-for="team in teams" :key="team.id" :value="team.id">
                         {{ team.name }}
                     </option>
@@ -11,23 +12,24 @@
             </div>
             <div class="col-md-3">
                 <label for="date" class="form-label text-ucla-blue">Date:</label>
-                <input id="date" type="month" class="form-control bg-seasalt text-jet" v-model="date" @change="selectedSuite ? fetchData() : null">
+                <input id="date" type="month" class="form-control bg-seasalt text-jet" v-model="date"
+                    @change="selectedSuite ? fetchData() : null">
             </div>
             <div class="col-md-6" v-if="selectedTeam">
                 <label for="suite-dropdown" class="form-label text-ucla-blue">Suite:</label>
                 <div class="dropdown" ref="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle w-100 bg-ucla-blue text-seasalt" type="button" id="suite-dropdown"
-                            data-bs-toggle="dropdown" aria-expanded="false" @click="toggleDropdown">
+                    <button class="btn btn-secondary dropdown-toggle w-100 bg-ucla-blue text-seasalt" type="button"
+                        id="suite-dropdown" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleDropdown">
                         {{ selectedSuite || 'Select a suite' }}
                     </button>
                     <div class="dropdown-menu w-100" aria-labelledby="suite-dropdown">
                         <div class="p-2">
-                            <input type="text" class="form-control mb-2 bg-seasalt text-jet" v-model="suiteFilter" placeholder="Type to filter..."
-                                   @input="filterSuites">
+                            <input type="text" class="form-control mb-2 bg-seasalt text-jet" v-model="suiteFilter"
+                                placeholder="Type to filter..." @input="filterSuites">
                         </div>
                         <ul class="list-group overflow-auto" style="max-height: 200px;">
-                            <li class="list-group-item bg-seasalt text-jet bg-animation clickable-item" href="#" v-for="suite in filteredSuites" :key="suite"
-                                @click.prevent="selectSuite(suite)">
+                            <li class="list-group-item bg-seasalt text-jet bg-animation clickable-item" href="#"
+                                v-for="suite in filteredSuites" :key="suite" @click.prevent="selectSuite(suite)">
                                 {{ suite }}
                             </li>
                         </ul>
@@ -38,7 +40,10 @@
 
         <div class="row">
             <div class="col">
-                <apexchart v-if="chartSeries.length" type="heatmap" :options="chartOptions" :series="chartSeries"></apexchart>
+                <div v-if="!chartSeries.length" class="chart-placeholder">
+                    Loading chart...
+                </div>
+                <apexchart v-else type="heatmap" :options="chartOptions" :series="chartSeries"></apexchart>
             </div>
         </div>
     </div>
@@ -55,7 +60,12 @@ export default {
     data() {
         return {
             selectedTeam: null,
+
             date: '',
+
+            minDate: '', 
+            maxDate: '',
+
             teams: [],
             selectedSuite: null,
             suiteFilter: '',
@@ -64,7 +74,7 @@ export default {
             chartOptions: {
                 chart: {
                     type: 'heatmap',
-                    height: 350,
+                    height: 'auto',
                     toolbar: {
                         show: true
                     }
@@ -72,17 +82,38 @@ export default {
                 dataLabels: {
                     enabled: false
                 },
-                colors: ["#008FFB"],
+                stroke: {
+                    show: true,
+                    width: 0.2, // Width of the stroke line
+                    colors: ['#333333ff'],
+                },
+
+                fill: {
+                    type: 'solid',
+                    opacity: 1
+                },
+                colors: ["#3a6f8fff"],
                 title: {
                     text: 'Testcase Duration Heatmap'
                 },
                 xaxis: {
                     type: 'category',
-                    categories: []
+                    categories: [], // This will be dynamically set
+                    labels: {
+                        formatter: (val) => {
+
+                            const date = new Date(val);
+                            return `${date.getUTCFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
+                        }
+                    }
                 },
                 yaxis: {
-                    title: {
-                        text: 'Testcase'
+                    labels: {
+                        maxWidth: 160,
+                        formatter: (val) => {
+                            // Truncate long labels on the y-axis
+                            return val.length > 15 ? val.substring(0, 15) + '...' : val;
+                        }
                     }
                 },
                 tooltip: {
@@ -96,7 +127,7 @@ export default {
                     heatmap: {
                         shadeIntensity: 0.5,
                         radius: 0,
-                        useFillColorAsStroke: true,
+                        useFillColorAsStroke: false,
                         colorScale: {
                             ranges: [
                                 {
@@ -122,13 +153,13 @@ export default {
                     },
                 },
             },
-            chartSeries: []
+            chartSeries: [],
         };
     },
 
     async mounted() {
         await this.fetchTeams();
-        await this.fetchSuites(); // Fetch the date range for the date input
+        await this.fetchDateRange();
     },
 
     methods: {
@@ -147,6 +178,17 @@ export default {
                 .catch((error) => {
                     console.error('Error fetching data:', error);
                 });
+        },
+        async fetchDateRange() {
+            try {
+                const response = await axios.get(`/api/v1/date-range/${this.selectedTeam}/`);
+                this.minDate = response.data.min_date.split('T')[0].slice(0, 7);
+                this.maxDate = response.data.max_date.split('T')[0].slice(0, 7);
+                this.date = this.maxDate;
+                await this.fetchSuites(); 
+            } catch (error) {
+                console.error("Error fetching heatmap date range:", error);
+            }
         },
         async fetchTeams() {
             try {
@@ -171,6 +213,7 @@ export default {
                 const response = await axios.get(`/api/v1/suite-names/${this.selectedTeam}/`);
                 this.suites = response.data;
                 this.filteredSuites = this.suites;
+                this.selectSuite(this.filteredSuites[0]);
             } catch (error) {
                 console.error("Error fetching suite names:", error);
             }
@@ -236,12 +279,22 @@ export default {
 };
 </script>
 <style>
-    .clickable-item {
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
+.clickable-item {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-    .clickable-item:hover {
-        background-color: #a3d5ff; /* light-sky-blue */
-    }
-</style>
+.clickable-item:hover {
+    background-color: #a3d5ff;
+    /* light-sky-blue */
+}
+
+.chart-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #aaa;
+}</style>

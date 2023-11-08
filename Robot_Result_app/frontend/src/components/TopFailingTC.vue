@@ -33,10 +33,31 @@ export default {
                 chart: {
                     id: 'top-failing-test-cases',
                     type: 'bar',
+                    height: 'auto',
                 },
                 xaxis: {
-                    categories: []
+                    categories: [], // This will be set dynamically
+                labels: {
+                    trim: true,
+                    rotate: -45,
+                    rotateAlways: true,
+                    minHeight: 100,
+                    formatter: (val) => {
+                        return val.length > 10 ? val.substring(0, 10) + '...' : val;
+                    }
                 },
+                tooltip: {
+                    enabled: false // Disable tooltip if labels are too long
+                }
+                },
+                yaxis: {
+                labels: {
+                    formatter: (val) => {
+                        return Math.round(val); // Rounds to the nearest whole number
+                    }
+                },
+                tickAmount: 5 // Adjust to control the number of ticks
+            },
                 plotOptions: {
                     bar: {
                         horizontal: false,
@@ -48,6 +69,7 @@ export default {
                 title: {
                     text: 'Top Failing Test Cases'
                 },
+                colors: ['#3a6f8fff']
             },
             series: [
                 {
@@ -85,7 +107,9 @@ export default {
                 try {
                     const response = await axios.get(`/api/v1/top-failing-testcases/${this.selectedTeam}/`);
                     this.series[0].data = response.data.map(item => item.failure_count);
+                    this.chartOptions.xaxis.categories = [];
                     this.chartOptions.xaxis.categories = response.data.map(item => item.name);
+                    console.log(this.chartOptions.xaxis.categories);
                     this.loaded = true;
                 } catch (error) {
                     console.error("Error fetching failing test cases:", error);
