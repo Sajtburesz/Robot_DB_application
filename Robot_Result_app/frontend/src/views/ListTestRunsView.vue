@@ -87,6 +87,7 @@ export default {
         this.nextPageUrl = response.data.next;
         this.previousPageUrl = response.data.previous;
         this.testRuns = response.data.results;
+        console.log(response.data.results);
       } catch (error) {
         this.$toast.error("Error during fetching test runs.");
       }

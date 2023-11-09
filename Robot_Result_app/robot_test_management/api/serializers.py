@@ -122,10 +122,19 @@ class KeywordSerializer(serializers.ModelSerializer):
 # Retreive serializers
 
 class TestRunListSerializer(serializers.ModelSerializer):
-    team = serializers.StringRelatedField()
+    executed_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True)
+    status = serializers.SerializerMethodField()
+
     class Meta:
         model = TestRun
-        fields = ['id', 'attributes','team'] 
+        fields = ['id', 'attributes', 'team', 'executed_at', 'is_public','status']
+
+    def get_status(self, obj):
+        has_failure = TestCase.objects.filter(
+            suite__test_run=obj, 
+            status='FAIL'
+        ).exists()
+        return 'FAIL' if has_failure else 'PASS'
 
 # Retreive Single Testrun Instance with Suites
 
