@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-db.sh/docker-entrypoint-initdb.d  # Mount your init-db.sh script
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword  # Change this to your desired password
+      NEW_DB_NAME: robot_db        # New database name
+      NEW_DB_USER: django_backend        # New database user
+      NEW_DB_PASSWORD: super_secret_pass  # New database user password
+    ports:
+      - "5432:5432"
+
+  django:
+    build: .
+    environment:
+      NEW_DB_NAME: robot_db        # New database name
+      NEW_DB_USER: django_backend        # New database user
+      NEW_DB_PASSWORD: super_secret_pass 
+    volumes:
+      - .:/usr/src/app
+      - static_volume:/usr/src/app/static
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  vue:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - django
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/static
+    depends_on:
+      - vue
+      - django
+
+volumes:
+  postgres_data:
+  static_volume:

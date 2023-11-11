@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-g-1(sg$k89kwwxpkwdb0hnkuv_xeqrqw)uq_un*zntv_q-mjf#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -54,10 +54,10 @@ INSTALLED_APPS = [
     "djoser",
     "django_filters",
     "drf_yasg",
-
-    "debug_toolbar",
-    
+    'corsheaders',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = False
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -70,9 +70,7 @@ MIDDLEWARE = [
 
     'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
 
-
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # TODO: Remove debug tool
+    'corsheaders.middleware.CorsMiddleware',
 ]
 INTERNAL_IPS = [
     # ...
@@ -107,14 +105,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'robot_db',
-        'USER': 'django_backend',
-        'PASSWORD': 'super_secret_password',
-        'HOST': 'localhost',
+        'NAME': os.getenv('NEW_DB_NAME', 'default_db_name'),  # Default value if not set
+        'USER': os.getenv('NEW_DB_USER', 'default_user'),
+        'PASSWORD': os.getenv('NEW_DB_PASSWORD', 'default_password'),
+        'HOST': 'db',  # Name of your database service in docker-compose
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -155,13 +152,11 @@ LOGOUT_REDIRECT_URL = "/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
-    
+ALLOWED_HOSTS = ['*']
+
 MEDIA_URL = "/media/"
 MEADIA_ROOT = "uploads"
 
