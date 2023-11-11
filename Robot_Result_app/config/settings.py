@@ -54,8 +54,7 @@ INSTALLED_APPS = [
     "djoser",
     "django_filters",
     "drf_yasg",
-
-    "debug_toolbar",
+    'corsheaders',
     
 ]
 
@@ -69,16 +68,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
-
-
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # TODO: Remove debug tool
+    'corsheaders.middleware.CorsMiddleware',
 ]
 INTERNAL_IPS = [
     # ...
     "127.0.0.1",
     # ...
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ['*']
 
 ROOT_URLCONF = 'config.urls'
 
@@ -155,12 +154,9 @@ LOGOUT_REDIRECT_URL = "/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, '/static')
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
     
 MEDIA_URL = "/media/"
 MEADIA_ROOT = "uploads"
