@@ -1,0 +1,14 @@
+frontend/
+postgres/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.git/
+.dockerignore
+Dockerfile
+README.md

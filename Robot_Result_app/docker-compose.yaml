@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./postgres/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: some_default_password
+      POSTGRES_DB: postgres
+      NEW_DB_NAME: robot_db
+      NEW_DB_USER: django_backend
+      NEW_DB_PASSWORD: super_secret_password
+    stop_grace_period: 1m30s
+    stop_signal: SIGINT
+    # command: sh -c "/backup-db.sh && docker-entrypoint.sh postgres"
+    ports:
+      - "5432:5432"
+  django:
+    build: .
+    volumes:
+      - .:/robot_db
+      - static_volume:/robot_db/staticfiles 
+    environment:
+      NEW_DB_NAME: robot_db
+      NEW_DB_USER: django_backend
+      NEW_DB_PASSWORD: super_secret_password
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  vuejs:
+    build: ./frontend
+    volumes:
+      - static_volume:/usr/share/nginx/html/static 
+    ports:
+      - "8080:80"
+    depends_on:
+      - django
+
+volumes:
+  db_data:
+  static_volume:

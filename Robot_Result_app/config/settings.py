@@ -54,8 +54,6 @@ INSTALLED_APPS = [
     "djoser",
     "django_filters",
     "drf_yasg",
-
-    "debug_toolbar",
     
 ]
 
@@ -71,13 +69,6 @@ MIDDLEWARE = [
     'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
 
 
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # TODO: Remove debug tool
-]
-INTERNAL_IPS = [
-    # ...
-    "127.0.0.1",
-    # ...
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -104,13 +95,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'robot_db',
-        'USER': 'django_backend',
-        'PASSWORD': 'super_secret_password',
-        'HOST': 'localhost',
+        'NAME': os.environ.get('NEW_DB_NAME', 'default_db_name'),
+        'USER': os.environ.get('NEW_DB_USER', 'default_db_user'),
+        'PASSWORD': os.environ.get('NEW_DB_PASSWORD', 'default_db_password'),
+        'HOST': 'db',  # Name of the service in docker-compose.yml
         'PORT': '5432',
     }
 }
@@ -162,8 +154,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
     
-MEDIA_URL = "/media/"
-MEADIA_ROOT = "uploads"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -182,3 +174,5 @@ REST_FRAMEWORK = {
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'django', 'your_production_domain.com']
