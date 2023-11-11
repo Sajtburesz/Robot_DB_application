@@ -26,9 +26,6 @@ SECRET_KEY = 'django-insecure-g-1(sg$k89kwwxpkwdb0hnkuv_xeqrqw)uq_un*zntv_q-mjf#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -105,9 +102,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('NEW_DB_NAME', 'default_db_name'),  # Default value if not set
-        'USER': os.getenv('NEW_DB_USER', 'default_user'),
-        'PASSWORD': os.getenv('NEW_DB_PASSWORD', 'default_password'),
+        'NAME': os.getenv('NEW_DB_NAME', 'robot_db'),  # Default value if not set
+        'USER': os.getenv('NEW_DB_USER', 'django_backend'),
+        'PASSWORD': os.getenv('NEW_DB_PASSWORD', 'super_secret_password'),
         'HOST': 'db',  # Name of your database service in docker-compose
         'PORT': '5432',
     }
@@ -154,6 +151,9 @@ LOGOUT_REDIRECT_URL = "/"
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    'css'
+]
 
 ALLOWED_HOSTS = ['*']
 

@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9
+FROM python:3.11
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -18,4 +18,4 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED 1
 
 # Run uvicorn
-CMD ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

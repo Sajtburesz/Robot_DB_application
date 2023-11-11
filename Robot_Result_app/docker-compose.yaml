@@ -32,6 +32,8 @@ services:
     build: ./frontend
     ports:
       - "8080:80"
+    volumes:
+      - static_volume:/static
     depends_on:
       - django
 
