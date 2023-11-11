@@ -1,22 +1,21 @@
 <template>
   <div class="container mt-5">
-    <div class="row mb-4 align-items-end">
+    <div class="row mb-4">
       <!-- Dropdown for teams -->
-      <div class="col-md-4">
-        <div class="mb-3">
-          <label for="teamSelect" class="form-label">Select a team:</label>
+      <div class="col-md-4 d-flex align-items-center">
+        <div class="w-100 form-floating">
           <select class="form-select form-select-sm" v-model="selectedTeam"
             @change="fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/`)" id="teamSelect">
-            <option disabled value="" selected>Please select a team</option>
             <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
           </select>
+          <label for="floatingSelect">Select a Team</label>
         </div>
       </div>
 
       <!-- Search Bar -->
-      <div class="col-md-8">
-        <div class="input-group">
-          <input type="text" v-model="searchQuery" @input="handleQueryChange" class="form-control" placeholder="Search test runs...">
+      <div class="col-md-8 d-flex align-items-center">
+        <div class="input-group w-100">
+          <input type="text" v-model="searchQuery" @input="handleQueryChange" class="form-control" placeholder="Filter test runs...">
           <span class="input-group-text"><i class="fas fa-search"></i></span>
         </div>
       </div>
@@ -29,22 +28,22 @@
           <h5 class="card-title">Test Run #{{ testRun.id }} - {{ testRun.name }}</h5>
           <div v-if="testRun.is_public" class="badge bg-success">Public</div>
           <div class="card-text mt-2">
-            <div class="row">
-              <div class="col-12 col-md-6" v-for="(attribute, index) in getFirstTwoAttributes(testRun.attributes)" :key="index">
-                <strong>{{ attribute.key }}:</strong> {{ attribute.value || 'N/A' }}
+          <div class="row">
+            <div class="col-12 col-md-6" v-for="(value, key) in firstTwoAttributes(testRun.attributes)" :key="key">
+              <strong>{{ key }}:</strong> {{ value || 'None' }}
+            </div>
+          </div>
+          <div v-if="Object.keys(testRun.attributes).length > 2">
+            <div v-if="testRun.showAllAttributes" class="row mt-2">
+              <div class="col-12 col-md-6" v-for="(value, key) in remainingAttributes(testRun.attributes)" :key="key">
+                <strong>{{ key }}:</strong> {{ value || 'None' }}
               </div>
             </div>
-            <div v-if="Object.keys(testRun.attributes).length > 2" class="collapse" :id="'collapseAttributes' + testRun.id">
-              <div class="row">
-                <div class="col-12 col-md-6" v-for="(attribute, index) in getRemainingAttributes(testRun.attributes)" :key="index">
-                  <strong>{{ attribute.key }}:</strong> {{ attribute.value || 'N/A' }}
-                </div>
-              </div>
-            </div>
-            <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseAttributes' + testRun.id" aria-expanded="false">
-              Show more
+            <button class="btn btn-link p-0" type="button" @click.prevent="toggleShowAllAttributes(testRun)">
+              {{ testRun.showAllAttributes ? 'Show less' : 'Show more' }}
             </button>
           </div>
+        </div>
           <p class="card-text text-muted small">Executed at: {{ new Date(testRun.executed_at).toLocaleDateString() }}</p>
         </div>
       </router-link>
@@ -73,10 +72,8 @@ export default {
       teams: [],
       selectedTeam: null,
       testRuns: [],
-
       nextPageUrl: null,
       previousPageUrl: null,
-
       searchQuery: "",
       debounceTimer: null
     };
@@ -97,61 +94,40 @@ export default {
         }
         this.teams = allTeams;
       } catch (error) {
-        this.$toast.error("Error during fetching teams.");
+        console.error("Error during fetching teams:", error);
       }
     },
     async fetchTestRuns(url) {
       try {
         const response = await axios.get(url);
+        this.testRuns = response.data.results.map(tr => ({ ...tr, showAllAttributes: false }));
         this.nextPageUrl = response.data.next;
         this.previousPageUrl = response.data.previous;
-        this.testRuns = response.data.results;
         console.log(response.data.results);
       } catch (error) {
-        this.$toast.error("Error during fetching test runs.");
+        console.error("Error during fetching test runs:", error);
       }
     },
-
     handleQueryChange() {
       clearTimeout(this.debounceTimer);
-
       this.debounceTimer = setTimeout(() => {
-        const url = this.createQueryUrl();
-        this.fetchTestRuns(url);
+        this.fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/?search=&${this.searchQuery}`);
       }, 500);
-    },
-    createQueryUrl() {
-      let url = `/api/v1/teams/${this.selectedTeam}/test-runs/?`;
-      const params = this.searchQuery.replace(/\s+/g, '');
-      url += params;
-      
-      return url;
     },
     toggleShowAllAttributes(testRun) {
       testRun.showAllAttributes = !testRun.showAllAttributes;
     },
-  },
-  computed: {
-    getFirstTwoAttributes() {
-      return (attributes) => {
-        return Object.entries(attributes)
-          .slice(0, 2)
-          .map(([key, value]) => ({ key, value }));
-      };
+    firstTwoAttributes(attributes) {
+      return Object.entries(attributes).slice(0, 2).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
     },
-    getRemainingAttributes() {
-      return (attributes) => {
-        return Object.entries(attributes)
-          .slice(2)
-          .map(([key, value]) => ({ key, value }));
-      };
-    },
-  },
+    remainingAttributes(attributes) {
+      return Object.entries(attributes).slice(2).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+    }
+  }
 };
 </script>
 
 <style scoped>
-/* Styling for the component */
 
 /* Team selection dropdown and search bar */
 .form-select-sm {

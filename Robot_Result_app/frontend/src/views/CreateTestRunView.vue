@@ -34,7 +34,6 @@
 
 <script>
 import { axios } from "@/common/api.service.js";
-import Cookies from "js-cookie";
 
 export default {
     data() {
@@ -42,7 +41,7 @@ export default {
             teams: [],
 
             attributes: [],
-            is_public: false,
+            is_public: null,
 
             selectedTeam: null,
             formAttributes: {},
@@ -63,9 +62,9 @@ export default {
     },
     async created() {
         try {
-            let loggedInUsername = Cookies.get('username');
+            const user = await axios.get('/auth/users/me/');
 
-            const teams = await axios.get('/api/v1/users/' + loggedInUsername + '/teams/');
+            const teams = await axios.get('/api/v1/users/' + user + '/teams/');
             this.teams = teams.data.results;
 
         } catch (error) {
@@ -74,6 +73,11 @@ export default {
             });
         }
     },
+    watch: {
+  is_public(newValue) {
+    console.log('is_public changed to:', newValue);
+  },
+},
     methods: {
         handleFileUpload() {
             this.uploadedFile = this.$refs.fileInput.files[0];
@@ -86,7 +90,7 @@ export default {
             formData.append('team', this.selectedTeam);
             formData.append('is_public', this.is_public);
             formData.append('attributes', JSON.stringify(this.formAttributes));
-
+            
             try {
                 await axios.post('/api/v1/upload/', formData);
 

@@ -31,7 +31,7 @@ class TestRunSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TestRun
-        fields = ['output_file', 'attributes', 'team']
+        fields = ['output_file', 'attributes', 'team', 'is_public']
     
     
     def validate_attributes(self, attrs):
@@ -139,9 +139,18 @@ class TestRunListSerializer(serializers.ModelSerializer):
 # Retreive Single Testrun Instance with Suites
 
 class TestSuiteNameSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+    
     class Meta:
         model = TestSuite
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'status']
+    
+    def get_status(self, obj):
+        has_failure = TestCase.objects.filter(
+            suite=obj, 
+            status='FAIL'
+        ).exists()
+        return 'FAIL' if has_failure else 'PASS'
     
 # Nested Pagination
 class PaginatedTestSuiteSerializer(PageNumberPaginationNoCount):
@@ -155,10 +164,11 @@ class PaginatedTestSuiteSerializer(PageNumberPaginationNoCount):
 
 class TestRunDetailSerializer(serializers.ModelSerializer):
     suites = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = TestRun
-        fields = ['id', 'attributes', 'team','suites','executed_at']
+        fields = ['id', 'attributes', 'team','suites','executed_at','status','is_public']
 
     def get_suites(self, obj):
         paginator = PaginatedTestSuiteSerializer()
@@ -166,6 +176,12 @@ class TestRunDetailSerializer(serializers.ModelSerializer):
         serializer = TestSuiteNameSerializer(paginated_suites, many=True).data
         return paginator.get_paginated_response(serializer)
     
+    def get_status(self, obj):
+        has_failure = TestCase.objects.filter(
+            suite__test_run=obj, 
+            status='FAIL'
+        ).exists()
+        return 'FAIL' if has_failure else 'PASS'
 
 # Retreive TestCases for a suite instance
 class TestCaseNameSerializer(serializers.ModelSerializer):
