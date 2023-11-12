@@ -19,16 +19,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g-1(sg$k89kwwxpkwdb0hnkuv_xeqrqw)uq_un*zntv_q-mjf#'
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
+ALLOWED_HOSTS = ['127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:1337']
 
-ALLOWED_HOSTS = []
-
-
+CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -54,9 +54,7 @@ INSTALLED_APPS = [
     "djoser",
     "django_filters",
     "drf_yasg",
-
-    "debug_toolbar",
-    
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -69,10 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
-
-
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # TODO: Remove debug tool
+    'corsheaders.middleware.CorsMiddleware',
 ]
 INTERNAL_IPS = [
     # ...
@@ -105,13 +100,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'robot_db',
-        'USER': 'django_backend',
-        'PASSWORD': 'super_secret_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
 
@@ -158,10 +153,6 @@ LOGOUT_REDIRECT_URL = "/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
-    
 MEDIA_URL = "/media/"
 MEADIA_ROOT = "uploads"
 

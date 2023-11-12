@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=django_backend
+      - POSTGRES_PASSWORD=super_secret_password
+      - POSTGRES_DB=robot_db
+
+  django:
+    build: .
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./:/usr/src/robot_db/
+      - static_volume:/home/app/robot_db/staticfiles
+    expose:
+      - 8000
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=*
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=robot_db
+      - SQL_USER=django_backend
+      - SQL_PASSWORD=super_secret_password
+      - SQL_HOST=db
+      - SQL_PORT=5432
+    depends_on:
+      - db
+  vue-nginx:
+    build: ./frontend
+    ports:
+      - 1337:80
+    volumes:
+      - static_volume:/home/app/robot_db/staticfiles
+    depends_on:
+      - django
+
+volumes:
+  static_volume:
