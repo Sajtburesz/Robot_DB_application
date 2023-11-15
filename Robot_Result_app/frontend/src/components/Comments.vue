@@ -1,35 +1,39 @@
 <template>
-  <div class="container mt-4 bg-light p-4 border rounded">
-    <!-- Comments Display Section -->
-    <div class="comments-display" @scroll="checkScroll">
-      <div v-for="comment in comments" :key="comment.id" class="mb-4">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <h6 class="fw-bold mb-1">{{ comment.author }}</h6>
-              <small class="text-muted">{{ formatDate(comment.updated_at) }}</small>
+    <div class="container mt-4 bg-light p-4 border rounded">
+        <!-- Comments Display Section -->
+        <div class="comments-display" @scroll="checkScroll">
+            <div v-for="comment in comments" :key="comment.id" class="mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h6 class="fw-bold mb-1">{{ comment.author }}</h6>
+                            <small class="text-muted">{{ formatDate(comment.updated_at) }}</small>
+                        </div>
+                        <p v-if="!isEditing(comment.id)" class="mt-2">{{ comment.text }}</p>
+                        <input v-else type="text" v-model="editText" class="form-control mb-2">
+                        <div class="d-flex justify-content-end">
+                            <button v-if="comment.canEdit" class="btn btn-link hover-zoom-icon"
+                                @click="toggleEdit(comment)">
+                                <font-awesome-icon
+                                    :icon="this.editingCommentId === comment.id ? 'fa-solid fa-floppy-disk' : 'fa-solid fa-pencil'"
+                                    style="color: #3a6d8d;" />
+                            </button>
+                            <button v-if="comment.canEdit" class="btn btn-link text-danger hover-zoom-icon"
+                                @click="deleteComment(comment.id)">
+                                <font-awesome-icon icon="fa-solid fa-trash" style="color: #bf1d1d;" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p v-if="!isEditing(comment.id)" class="mt-2">{{ comment.text }}</p>
-            <input v-else type="text" v-model="editText" class="form-control mb-2">
-            <div class="d-flex justify-content-end">
-              <button v-if="comment.canEdit" class="btn btn-link hover-zoom-icon" @click="toggleEdit(comment)">
-                <font-awesome-icon :icon="this.editingCommentId === comment.id ? 'fa-solid fa-floppy-disk' : 'fa-solid fa-pencil'" style="color: #3a6d8d;" />
-              </button>
-              <button v-if="comment.canEdit" class="btn btn-link text-danger hover-zoom-icon" @click="confirmDelete(comment.id)">
-                <font-awesome-icon icon="fa-solid fa-trash" style="color: #bf1d1d;"/>
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Add Comment Section -->
-    <div class="mt-4">
-      <textarea class="form-control" v-model="newCommentText" placeholder="Write a comment..." rows="3"></textarea>
-      <button class="btn btn-success btn-sm mt-2" @click="addComment">Post</button>
+        <!-- Add Comment Section -->
+        <div class="mt-4">
+            <textarea class="form-control" v-model="newCommentText" placeholder="Write a comment..." rows="3"></textarea>
+            <button class="btn btn-success btn-sm mt-2" @click="addComment">Post</button>
+        </div>
     </div>
-  </div>
 </template>
 
 
@@ -102,25 +106,23 @@ export default {
                 await axios.put(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/comments/${comment.id}/`, {
                     text: this.editText
                 });
-                await this.loadComments();
             }
             catch (error) {
                 console.error('Error saving comment:', error);
+            } finally{
+                this.editingCommentId = null;
+                this.loadComments();
             }
-            this.editingCommentId = null;
-        },
-        confirmDelete(commentId) {
-            if (confirm('Are you sure you want to delete this comment?')) {
-                this.deleteComment(commentId);
-            }
+
         },
         async deleteComment(commentId) {
             try {
                 await axios.delete(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/comments/${commentId}/`);
-                await this.loadComments();
             }
             catch (error) {
                 console.error('Error deleting comment:', error);
+            } finally{
+                this.loadComments();
             }
         },
         async addComment() {
@@ -134,7 +136,7 @@ export default {
                     testrun: this.testRunId
                 });
                 this.newCommentText = '';
-                await this.loadComments();
+                this.loadComments();
             }
             catch (error) {
                 console.error('Error adding comment:', error);
@@ -193,44 +195,18 @@ export default {
   
 <style scoped>
 .comments-display {
-  max-height: 80vh;
-  /* Adjust based on your layout */
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-bottom: 20px;
-}
-
-.add-comment-section {
-  padding: 10px;
-}
-
-.comment {
-  background-color: #f8f9fa;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.author {
-  font-weight: bold;
-}
-
-.timestamp {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.comment-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+    max-height: 80vh;
+    /* Adjust based on your layout */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 20px;
 }
 
 .hover-zoom-icon {
     transition: transform 0.3s ease;
-  }
-  
-.hover-zoom-icon:hover {
-transform: scale(1.1);
 }
-</style>
+
+.hover-zoom-icon:hover {
+    transform: scale(1.1);
+}</style>
   

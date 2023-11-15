@@ -21,8 +21,20 @@
       </div>
     </div>
 
+    <!-- Selection Summary -->
+    <div v-if="selectedTestRuns.length > 0" class="mb-3 d-flex justify-content-between align-items-center">
+      <span>
+        Selected for compare ({{ selectedTestRuns.length}}/2): {{ selectedTestRuns.map(testRun => testRun.id).join(', ') }}
+      </span>
+      <button v-if="selectedTestRuns.length === 2" class="btn btn-primary btn-sm" @click="compareTestRuns">Compare</button>
+    </div>
+
     <!-- Display test runs -->
     <div v-for="testRun in testRuns" :key="testRun.id" class="card mb-3">
+      <div class="form-check ms-2 mt-2">
+      <input class="form-check-input me-2" id="compareCheckbox" type="checkbox" v-model="selectedTestRuns" :value="testRun" @change="selectTestRun(testRun)">
+      <label for="compareCheckbox" class="form-check-label text-muted">Add to compare</label>
+    </div>
       <router-link :to="{ name: 'TestRunView', params:{ teamId: `${this.selectedTeam}`, testRunId:`${testRun.id}` } }" class="text-decoration-none">
         <div class="card-body">
           <h5 class="card-title">Test Run #{{ testRun.id }} - {{ testRun.name }}</h5>
@@ -75,7 +87,8 @@ export default {
       nextPageUrl: null,
       previousPageUrl: null,
       searchQuery: "",
-      debounceTimer: null
+      debounceTimer: null,
+      selectedTestRuns: []
     };
   },
   created() {
@@ -122,6 +135,16 @@ export default {
     },
     remainingAttributes(attributes) {
       return Object.entries(attributes).slice(2).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+    },
+
+    selectTestRun(testRun) {
+      if (this.selectedTestRuns.length > 2) {
+        this.selectedTestRuns.pop(testRun);
+        this.$toast.error("Only 2 Testruns can be selected");
+      } 
+    },
+    compareTestRuns() {
+      console.log("jej");
     }
   }
 };
