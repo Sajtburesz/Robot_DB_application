@@ -1,5 +1,6 @@
 <template>
-    <div class="container mt-4 bg-light p-4 border rounded">
+    <div class="container mt-4 bg-light p-4 ">
+        <span class="fw-bold">Comments</span>
         <!-- Comments Display Section -->
         <div class="comments-display" @scroll="checkScroll">
             <div v-for="comment in comments" :key="comment.id" class="mb-4">
@@ -195,7 +196,7 @@ export default {
   
 <style scoped>
 .comments-display {
-    max-height: 80vh;
+    max-height: 100vh;
     /* Adjust based on your layout */
     overflow-y: auto;
     overflow-x: hidden;
