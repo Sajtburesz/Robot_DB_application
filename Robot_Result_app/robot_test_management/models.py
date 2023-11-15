@@ -37,6 +37,6 @@ class Keyword(models.Model):
 class Comment(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     testrun = models.ForeignKey(TestRun, related_name='comments', on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

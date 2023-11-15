@@ -3,6 +3,7 @@ import django_filters
 from robot_test_management.models import TestRun, TestSuite
 
 class TestRunFilter(django_filters.FilterSet):
+    # TODO: Filter based on executed at also
 
     class Meta:
         model = TestRun

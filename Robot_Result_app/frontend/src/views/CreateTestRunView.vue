@@ -41,7 +41,7 @@ export default {
             teams: [],
 
             attributes: [],
-            is_public: null,
+            is_public: false,
 
             selectedTeam: null,
             formAttributes: {},
@@ -73,11 +73,7 @@ export default {
             });
         }
     },
-    watch: {
-  is_public(newValue) {
-    console.log('is_public changed to:', newValue);
-  },
-},
+
     methods: {
         handleFileUpload() {
             this.uploadedFile = this.$refs.fileInput.files[0];
@@ -88,12 +84,12 @@ export default {
 
             formData.append('output_file', this.uploadedFile);
             formData.append('team', this.selectedTeam);
-            formData.append('is_public', this.is_public);
+            formData.append('is_public', this.is_public ? 'True' : 'False');
             formData.append('attributes', JSON.stringify(this.formAttributes));
             
             try {
-                await axios.post('/api/v1/upload/', formData);
-
+                const response = await axios.post('/api/v1/upload/', formData);
+                this.$router.push({ name: 'TestRunView', params: { "teamId" : response.data.team, "testRunId":response.data.id } });
             } catch (error) {
                 this.$toast.error(error.request.statusText, {
                     duration: 4000,

@@ -98,7 +98,6 @@
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 border-2">
 
                     <!-- First Part: Username -->
-                    <!-- TODO: ADD router link to retreive users profile and edit retreive profile view to take props -->
                     <div class="col-4 d-flex justify-content-start">
                         <span class="fw-bold">{{ member.username }}</span>
                     </div>
@@ -133,8 +132,8 @@
   
 <script>
 import 'font-awesome/css/font-awesome.css'
-
 import { axios } from "@/common/api.service.js";
+
 import Cookies from "js-cookie";
 
 import UserSearchComponent from "@/components/UserSearch.vue";

@@ -54,7 +54,7 @@ class IsAdmin(permissions.BasePermission):
 class IsTeamMemberOfRelatedTeam(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        team_pk = view.kwargs.get('teampk')
+        team_pk = view.kwargs.get('teamId')
         
         if not TeamMembership.objects.filter(team_id=team_pk, user=request.user).exists():
             raise PermissionDenied(detail="You are not a member of the specified team.")
@@ -65,4 +65,4 @@ class IsTeamMemberOfRelatedTeam(permissions.BasePermission):
 class IsCommentAuthorOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user or request.user.is_superuser
+        return obj.author == request.user or request.user.is_superuser

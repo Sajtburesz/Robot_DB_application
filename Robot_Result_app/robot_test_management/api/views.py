@@ -17,7 +17,9 @@ from robot_test_management.models import (TestCase,
                                           Comment,
                                           Attributes)
 
-from robot_test_management.api.serializers import (CommentSerializer, TestCaseDetaileSerializer, 
+from robot_test_management.api.serializers import (CommentSerializer, 
+                                                   CommentUpdateSerializer, 
+                                                   TestCaseDetaileSerializer, 
                                                    TestRunDetailSerializer, 
                                                    TestRunListSerializer, 
                                                    TestRunSerializer, 
@@ -51,10 +53,10 @@ class TestRunListView(generics.ListAPIView):
     filterset_class = TestRunFilter
     
     def get_queryset(self):
-        team_id = self.kwargs['teampk']
+        team_id = self.kwargs.get('teamId')
         return TestRun.objects.filter(team_id=team_id)
 
-class TestRunRetreiveView(generics.RetrieveAPIView):
+class TestRunRetreiveView(generics.RetrieveUpdateDestroyAPIView):
     # TODO: CHANGE THIS TO RETREIVEUPDATEDESTROY VIEW
     serializer_class = TestRunDetailSerializer
 
@@ -62,7 +64,7 @@ class TestRunRetreiveView(generics.RetrieveAPIView):
     # TODO: Maybe add filtering option to nested suites?
 
     def get_queryset(self):
-        team_id = self.kwargs['teampk']
+        team_id = self.kwargs.get('teamId')
         return TestRun.objects.filter(team_id=team_id)
     
 class TestSuiteReteiveView(generics.RetrieveAPIView):
@@ -71,7 +73,7 @@ class TestSuiteReteiveView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam]
 
     def get_queryset(self):
-        team_id = self.kwargs['teampk']
+        team_id = self.kwargs.get('teamId')
         return TestSuite.objects.filter(test_run__team_id=team_id).prefetch_related('test_cases')
 
 class TestCaseRetreiveView(generics.RetrieveAPIView):
@@ -80,7 +82,7 @@ class TestCaseRetreiveView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam]
 
     def get_queryset(self):
-        team_id = self.kwargs['teampk']
+        team_id = self.kwargs.get('teamId')
         return TestCase.objects.filter(suite__test_run__team_id=team_id).prefetch_related('keywords')
 
 
@@ -168,45 +170,47 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam]
 
     def get_queryset(self):
-        testrun_id = self.kwargs['testrunpk']
+        testrun_id = self.kwargs.get('testrunpk')
         return Comment.objects.filter(testrun_id=testrun_id)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, testrun_id=self.kwargs['testrunpk'])
+        serializer.save(author=self.request.user, testrun_id=self.kwargs.get('testrunpk'))
 
 
 class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
+    serializer_class = CommentUpdateSerializer
     permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam, IsCommentAuthorOrAdmin]
 
+    def get_queryset(self):
+        comment_id = self.kwargs.get('pk')
+        return Comment.objects.filter(id = comment_id)
 
 # Dashboard statistics
 
 class TopFailingTestCasesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, teampk):
+    def get(self, request, teamId):
         failing_testcases = TestCase.objects.filter(
-            suite__test_run__team_id=teampk, status="FAIL"
+            suite__test_run__team_id=teamId, status="FAIL"
         ).values("name").annotate(
             failure_count=Count('id')
         ).order_by('-failure_count')[:5]
         return Response(failing_testcases)
 
 class DateRangeView(APIView):
-    def get(self, request, teampk, format=None):
-        date_range = TestRun.objects.filter(team_id=teampk).aggregate(
+    def get(self, request, teamId, format=None):
+        date_range = TestRun.objects.filter(team_id=teamId).aggregate(
             min_date=Min('executed_at'),
             max_date=Max('executed_at')
         )
         return Response(date_range, status=status.HTTP_200_OK)
 
 class TreemapDataView(APIView):
-    def get(self, request, teampk, format=None):
+    def get(self, request, teamId, format=None):
         start_date = request.query_params.get('start_date')
         suites_aggregated = TestCase.objects.filter(
-            suite__test_run__team_id=teampk
+            suite__test_run__team_id=teamId
         ).values(
             'suite__name'
         ).annotate(
@@ -228,13 +232,13 @@ class TreemapDataView(APIView):
 
 
 class TimelineDataView(APIView):
-    def get(self, request, teampk, format=None):
+    def get(self, request, teamId, format=None):
         start_date = request.query_params.get('start_date')
         suite_filter = request.query_params.get('suite_filter', '')
 
         # Query to get the test cases and their failure periods
         test_case_runs = TestCase.objects.filter(
-            suite__test_run__team_id=teampk,
+            suite__test_run__team_id=teamId,
             suite__name__icontains=suite_filter,
             status='FAIL'
         ).order_by('name', 'suite__test_run__executed_at').values(
@@ -282,7 +286,7 @@ class TimelineDataView(APIView):
         return Response(timeline_data, status=status.HTTP_200_OK)
 
 class TestCaseDurationHeatmapData(APIView):
-  def post(self, request, teampk):
+  def post(self, request, teamId):
         # Retrieve suite name and date from the request data
         suite_name = request.data.get('suite_name')
         date_str = request.data.get('date')  # Expected format: "YYYY-MM"
@@ -301,7 +305,7 @@ class TestCaseDurationHeatmapData(APIView):
         # Filter test cases by the provided team pk, suite name, and date range
         test_cases = TestCase.objects.filter(
             suite__name=suite_name,
-            suite__test_run__team__pk=teampk,
+            suite__test_run__team__pk=teamId,
             suite__test_run__executed_at__gte=first_day_of_month,
             suite__test_run__executed_at__lt=first_day_of_next_month
         )
@@ -338,5 +342,5 @@ class TestCaseDurationHeatmapData(APIView):
 
 # Helper 
 class SuiteNames(APIView):
-    def get(self, request, teampk):
-        return Response(TestSuite.objects.filter(test_run__team_id=teampk).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)
+    def get(self, request, teamId):
+        return Response(TestSuite.objects.filter(test_run__team_id=teamId).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)

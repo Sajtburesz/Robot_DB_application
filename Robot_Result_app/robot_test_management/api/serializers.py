@@ -31,8 +31,10 @@ class TestRunSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TestRun
-        fields = ['output_file', 'attributes', 'team', 'is_public']
-    
+        fields = ['output_file', 'attributes', 'team', 'is_public', 'id']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
     
     def validate_attributes(self, attrs):
         all_keys = set(Attributes.objects.values_list('key_name', flat=True))
@@ -122,7 +124,7 @@ class KeywordSerializer(serializers.ModelSerializer):
 # Retreive serializers
 
 class TestRunListSerializer(serializers.ModelSerializer):
-    executed_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True)
+    executed_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True) # type: ignore
     status = serializers.SerializerMethodField()
 
     class Meta:
@@ -165,10 +167,14 @@ class PaginatedTestSuiteSerializer(PageNumberPaginationNoCount):
 class TestRunDetailSerializer(serializers.ModelSerializer):
     suites = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    executed_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True) # type: ignore
 
     class Meta:
         model = TestRun
         fields = ['id', 'attributes', 'team','suites','executed_at','status','is_public']
+        extra_kwargs = {
+            'team': {'read_only': True},
+        }
 
     def get_suites(self, obj):
         paginator = PaginatedTestSuiteSerializer()
@@ -182,6 +188,24 @@ class TestRunDetailSerializer(serializers.ModelSerializer):
             status='FAIL'
         ).exists()
         return 'FAIL' if has_failure else 'PASS'
+    
+    def validate_attributes(self, value):
+        if self.instance:
+            original_attributes = self.instance.attributes
+        else:
+            original_attributes = {}
+
+        original_keys = set(original_attributes.keys())
+        new_keys = set(value.keys())
+
+        if not new_keys.issubset(original_keys):
+            added_keys = new_keys - original_keys
+            raise serializers.ValidationError(f"Adding new keys {added_keys} is not allowed.")
+
+        updated_attributes = original_attributes.copy()
+        updated_attributes.update(value)
+
+        return updated_attributes
 
 # Retreive TestCases for a suite instance
 class TestCaseNameSerializer(serializers.ModelSerializer):
@@ -213,8 +237,15 @@ class TestCaseDetaileSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='user.username')  # Display the username
+    author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
         model = Comment
         fields = ['id', 'author', 'testrun', 'text', 'created_at', 'updated_at']
+        read_only_fields = ['author','created_at','updated_at']
+    
+class CommentUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ['text']

@@ -27,26 +27,26 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         # If querying a specific user
         if self.request.method == 'GET' and self.kwargs.get('username'):
             # If the queried user matches the authenticated user
-            if self.kwargs['username'] == self.request.user.username:
+            if self.kwargs.get('username') == self.request.user.username:
                 return UserDetailSelfSerializer
             # If querying someone else's details
             else:
                 return UserDetailOtherSerializer
 
         # Default to the self detail serializer for other actions (e.g., update)
-        if self.kwargs['username'] == self.request.user.username:
+        if self.kwargs.get('username') == self.request.user.username:
             return UserDetailSelfSerializer
         else:
             return UserDetailOtherSerializer
 
     # Ensure that only the authenticated user can edit their own profile
     def update(self, request, *args, **kwargs):
-        if kwargs['username'] != request.user.username:
+        if self.kwargs.get('username') != request.user.username:
             return Response({"detail": "You can only edit your own profile."}, status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
     
     def destroy(self, request, *args, **kwargs):
-        if kwargs['username'] != request.user.username:
+        if self.kwargs.get('username') != request.user.username:
             return Response({"detail": "You can only delete your own profile."}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
 
@@ -68,7 +68,7 @@ class AvatarUpdateView(generics.RetrieveUpdateAPIView):
         return User.objects.all()
 
     def get_object(self):
-        return get_object_or_404(User, username=self.kwargs['username'])
+        return get_object_or_404(User, username=self.kwargs.get('username'))
 
     def delete(self, request, *args, **kwargs):
         return Response({"detail": "Deletion not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
