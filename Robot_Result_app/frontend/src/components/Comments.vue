@@ -10,7 +10,7 @@
                             <small class="text-muted">{{ formatDate(comment.updated_at) }}</small>
                         </div>
                         <p v-if="!isEditing(comment.id)" class="mt-2">{{ comment.text }}</p>
-                        <input v-else type="text" v-model="editText" class="form-control mb-2">
+                        <textarea v-else class="form-control mb-2" v-model="editText" rows="3" maxlength="200"></textarea>
                         <div class="d-flex justify-content-end">
                             <button v-if="comment.canEdit" class="btn btn-link hover-zoom-icon"
                                 @click="toggleEdit(comment)">
@@ -30,7 +30,7 @@
 
         <!-- Add Comment Section -->
         <div class="mt-4">
-            <textarea class="form-control" v-model="newCommentText" placeholder="Write a comment..." rows="3"></textarea>
+            <textarea class="form-control" v-model="newCommentText" placeholder="Write a comment..." rows="3" maxlength="200"></textarea>
             <button class="btn btn-success btn-sm mt-2" @click="addComment">Post</button>
         </div>
     </div>
