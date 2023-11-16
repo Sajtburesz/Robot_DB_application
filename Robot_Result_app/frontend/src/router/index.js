@@ -43,6 +43,11 @@ const routes = [
     name: 'TestRunView',
     component: () => import('../views/TestRunView.vue'),
   },
+  {
+    path: '/test-runs/compare/',
+    name: 'CompareTestRunView',
+    component: () => import('../views/CompareTestRunsView.vue'),
+  },
 ]
 
 const router = createRouter({

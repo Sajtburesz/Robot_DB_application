@@ -26,7 +26,10 @@
       <span>
         Selected for compare ({{ selectedTestRuns.length}}/2): {{ selectedTestRuns.map(testRun => testRun.id).join(', ') }}
       </span>
-      <button v-if="selectedTestRuns.length === 2" class="btn btn-primary btn-sm" @click="compareTestRuns">Compare</button>
+      <div>
+        <button v-if="selectedTestRuns.length === 2" class="btn btn-primary btn-sm" @click="compareTestRuns">Compare</button>
+        <font-awesome-icon v-if="selectedTestRuns.length > 0"  class="btn btn-link hover-zoom-icon" @click="deleteSelectedTestruns()" icon="fa-solid fa-xmark" />
+      </div>
     </div>
 
     <!-- Display test runs -->
@@ -93,6 +96,12 @@ export default {
   },
   created() {
     this.fetchTeams();
+    this.fetchStoredTestRuns();
+  },
+  computed: {
+    storedTestRuns() {
+      return this.$store.state.testRuns;
+    }
   },
   methods: {
     async fetchTeams() {
@@ -142,9 +151,18 @@ export default {
         this.selectedTestRuns.pop(testRun);
         this.$toast.error("Only 2 Testruns can be selected");
       } 
+      this.$store.dispatch('setTestRuns', []);
+      this.$store.dispatch('setTestRuns', this.selectedTestRuns);
     },
     compareTestRuns() {
-      console.log("jej");
+      this.$router.push({ name: 'CompareTestRunView' });
+    },
+    fetchStoredTestRuns(){
+      this.storedTestRuns.map(testrun => this.selectedTestRuns.push(testrun));
+    },
+    deleteSelectedTestruns(){
+      this.selectedTestRuns = [];
+      this.$store.dispatch('setTestRuns', []);
     }
   }
 };
@@ -214,5 +232,13 @@ export default {
 
 .btn-link:hover {
   text-decoration: underline;
+}
+
+.hover-zoom-icon {
+    transition: transform 0.3s ease;
+}
+
+.hover-zoom-icon:hover {
+    transform: scale(1.1);
 }
 </style>

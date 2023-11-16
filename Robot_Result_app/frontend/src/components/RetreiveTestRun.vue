@@ -1,9 +1,5 @@
 <template>
   <div class="d-flex vh-100">
-    <!-- Comments Section -->
-    <div class="comments-section bg-light border-end">
-      <CommentsComponent :teamId="this.teamId" :testRunId="this.testRunId" />
-    </div>
 
     <!-- Main Content Section -->
     <div class="main-content flex-grow-1">
@@ -129,13 +125,9 @@
 
 <script>
 import { axios } from "@/common/api.service.js";
-import CommentsComponent from "@/components/Comments.vue";
 
 export default {
   props: ['testRunId', 'teamId'],
-  components: {
-    CommentsComponent
-  },
   data() {
     return {
       testRun: {},
