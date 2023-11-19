@@ -2,10 +2,25 @@
     <div class="container py-3 ">
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="team-select" class="form-label text-ucla-blue">Team:</label>
-                <select id="team-select" class="form-select bg-seasalt text-jet" v-model="selectedTeam" @change="fetchFailingTestcases">
-                    <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
-                </select>
+                <label for="team-dropdown" class="form-label text-ucla-blue">Team:</label>
+                <div class="dropdown" ref="teamDropdown">
+                    <button class="btn btn-secondary dropdown-toggle w-100 bg-ucla-blue text-seasalt truncate" type="button"
+                            id="team-dropdown" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleTeamDropdown()">
+                        {{ selectedTeamName || 'Select a team' }}
+                    </button>
+                    <div class="dropdown-menu w-100" aria-labelledby="team-dropdown">
+                        <div class="p-2">
+                            <input type="text" class="form-control mb-2 bg-seasalt text-jet" v-model="teamFilter"
+                                placeholder="Type to filter..." @input="filterTeams()">
+                        </div>
+                        <ul class="list-group overflow-auto" style="max-height: 200px;">
+                            <li class="list-group-item bg-seasalt text-jet bg-animation clickable-item " href="#"
+                                v-for="team in filteredTeams" :key="team.id" @click.prevent="selectTeam(team)">
+                                {{ team.name }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -78,7 +93,10 @@ export default {
                 }
             ],
             teams: [],
-            selectedTeam: null
+            selectedTeam: null,
+            selectedTeamName: null,
+            teamFilter: '',
+            filteredTeams: [],
         };
     },
     async mounted() {
@@ -97,7 +115,9 @@ export default {
                     url = response.data.next;
                 }
                 this.teams = allTeams;
+                this.filteredTeams = allTeams;
                 this.selectedTeam = this.teams[0]?.id;
+                this.selectedTeamName = this.teams[0]?.name;
             } catch (error) {
                 console.error("Error fetching user teams:", error);
             }
@@ -115,7 +135,28 @@ export default {
                     console.error("Error fetching failing test cases:", error);
                 }
             }
+        },
+    
+        filterTeams() {
+        if (this.teamFilter) {
+            this.filteredTeams = this.teams.filter((team) =>
+                team.name.toLowerCase().includes(this.teamFilter.toLowerCase())
+            );
+        } else {
+            this.filteredTeams = this.teams;
         }
+        },
+        selectTeam(team) {
+            this.selectedTeam = team.id;
+            this.selectedTeamName = team.name;
+            this.teamFilter = '';
+            this.filteredTeams = this.teams;
+            this.$refs.teamDropdown.classList.remove('show');
+            this.selectedTeamName = team.name;
+        },
+        toggleTeamDropdown() {
+            this.$refs.teamDropdown.classList.toggle('show');
+        },
     }
 };
 </script>

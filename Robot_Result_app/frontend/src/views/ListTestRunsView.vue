@@ -16,7 +16,7 @@
       <div class="col-md-8 d-flex align-items-center">
         <div class="input-group w-100">
           <input type="text" v-model="searchQuery" @input="handleQueryChange" class="form-control" placeholder="Filter test runs...">
-          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <span class="input-group-text"><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></span> 
         </div>
       </div>
     </div>
@@ -91,7 +91,8 @@ export default {
       previousPageUrl: null,
       searchQuery: "",
       debounceTimer: null,
-      selectedTestRuns: []
+      selectedTestRuns: [],
+      wayOfAccess: []
     };
   },
   created() {
@@ -115,6 +116,11 @@ export default {
           url = response.data.next;
         }
         this.teams = allTeams;
+
+        this.teams.unshift({id:"public",name:"public"});
+        this.selectedTeam = this.teams[0].id;
+      
+        await this.fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/`);
       } catch (error) {
         console.error("Error during fetching teams:", error);
       }
@@ -150,7 +156,19 @@ export default {
       if (this.selectedTestRuns.length > 2) {
         this.selectedTestRuns.pop(testRun);
         this.$toast.error("Only 2 Testruns can be selected");
-      } 
+      }
+
+      if (this.selectedTeam === 'public') {
+        if (this.wayOfAccess.includes(testRun.id)){
+          this.wayOfAccess = this.wayOfAccess.filter(item => item !== testRun.id);
+          this.$store.dispatch('setWayOfAccess', []);
+          this.$store.dispatch('setWayOfAccess', this.wayOfAccess);
+        }else {
+          this.wayOfAccess.push(testRun.id);
+          this.$store.dispatch('setWayOfAccess', []);
+          this.$store.dispatch('setWayOfAccess', this.wayOfAccess);
+        }
+      }
       this.$store.dispatch('setTestRuns', []);
       this.$store.dispatch('setTestRuns', this.selectedTestRuns);
     },

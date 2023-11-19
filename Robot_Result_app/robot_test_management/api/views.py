@@ -9,6 +9,7 @@ from django.db.models import (Count,
                                 Avg,)
 from django.db.models.functions import TruncDay
 
+
 from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin
 
 from robot_test_management.models import (TestCase,
@@ -46,79 +47,95 @@ class TestRunCreateView(generics.CreateAPIView):
 # Testrun Views nonPublic
 class TestRunListView(generics.ListAPIView):
     serializer_class = TestRunListSerializer
-
-    permission_classes = [IsAuthenticated,IsTeamMemberOfRelatedTeam]
     
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TestRunFilter
     
     def get_queryset(self):
         team_id = self.kwargs.get('teamId')
-        return TestRun.objects.filter(team_id=team_id)
+        if team_id == "public":
+            return TestRun.objects.filter(is_public=True).order_by('-executed_at')
+        else:
+            try:
+                team_id = int(team_id)  # Convert team_id to an integer
+                return TestRun.objects.filter(team_id=team_id).order_by('-executed_at')
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def get_permissions(self):
+        team_id = self.kwargs.get('teamId')
+
+        if team_id == "public":
+            return [IsAuthenticated()]
+        else:
+            return [IsAuthenticated(),IsTeamMemberOfRelatedTeam()]
 
 class TestRunRetreiveView(generics.RetrieveUpdateDestroyAPIView):
-    # TODO: CHANGE THIS TO RETREIVEUPDATEDESTROY VIEW
     serializer_class = TestRunDetailSerializer
-
-    permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam]
+    permission_classes = [IsAuthenticated,IsTeamMemberOfRelatedTeam]
     # TODO: Maybe add filtering option to nested suites?
 
     def get_queryset(self):
         team_id = self.kwargs.get('teamId')
         return TestRun.objects.filter(team_id=team_id)
-    
+
+
+class TestRunRetreivePublicView(generics.RetrieveAPIView):
+    serializer_class = TestRunDetailSerializer
+    permission_classes = [IsAuthenticated]
+    # TODO: Maybe add filtering option to nested suites?
+
+    def get_queryset(self):
+        return TestRun.objects.filter(is_public = True)
+
+
 class TestSuiteReteiveView(generics.RetrieveAPIView):
     serializer_class = TestSuiteDetailSerializer
 
-    permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam]
-
     def get_queryset(self):
         team_id = self.kwargs.get('teamId')
-        return TestSuite.objects.filter(test_run__team_id=team_id).prefetch_related('test_cases')
+
+        if team_id == "public":
+            return TestSuite.objects.filter(test_run__is_public=True).prefetch_related('test_cases')
+        else:
+            try:
+                team_id = int(team_id)
+                return TestSuite.objects.filter(test_run__team_id=team_id).prefetch_related('test_cases')
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_permissions(self):
+        team_id = self.kwargs.get('teamId')
+
+        if team_id == "public":
+            return [IsAuthenticated()]
+        else:
+            return [IsAuthenticated(),IsTeamMemberOfRelatedTeam()]
 
 class TestCaseRetreiveView(generics.RetrieveAPIView):
     serializer_class = TestCaseDetaileSerializer
 
-    permission_classes = [IsAuthenticated, IsTeamMemberOfRelatedTeam]
-
     def get_queryset(self):
         team_id = self.kwargs.get('teamId')
-        return TestCase.objects.filter(suite__test_run__team_id=team_id).prefetch_related('keywords')
 
+        if team_id == "public":
+            return TestCase.objects.filter(suite__test_run__is_public=True).prefetch_related('keywords')
+        else:
+            try:
+                team_id = int(team_id)
+                return TestCase.objects.filter(suite__test_run__team_id=team_id).prefetch_related('keywords')
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
 
-# Testrun Views Public
-class PublicTestRunListView(generics.ListCreateAPIView):
-    serializer_class = TestRunListSerializer
+    def get_permissions(self):
+        team_id = self.kwargs.get('teamId')
 
-    permission_classes = [IsAuthenticated]
+        if team_id == "public":
+            return [IsAuthenticated()]
+        else:
+            return [IsAuthenticated(),IsTeamMemberOfRelatedTeam()]
 
-    def get_queryset(self):
-        return TestRun.objects.filter(is_public=True)
-
-class PublicTestRunRetreiveView(generics.RetrieveAPIView):
-    serializer_class = TestRunDetailSerializer
-
-    permission_classes = [IsAuthenticated]
-    # TODO: Maybe add filtering option to nested suites?
-
-    def get_queryset(self):
-        return TestRun.objects.filter(is_public=True)
-    
-class PublicTestSuiteReteiveView(generics.RetrieveAPIView):
-    serializer_class = TestSuiteDetailSerializer
-
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return TestSuite.objects.filter(test_run__is_public=True).prefetch_related('test_cases')
-
-class PublicTestCaseRetreiveView(generics.RetrieveAPIView):
-    serializer_class = TestCaseDetaileSerializer
-
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return TestCase.objects.filter(suite__test_run__is_public=True).prefetch_related('keywords')
 
 # Attribute Views 
 class AttributeListView(generics.ListAPIView):
@@ -171,7 +188,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         testrun_id = self.kwargs.get('testrunpk')
-        return Comment.objects.filter(testrun_id=testrun_id)
+        return Comment.objects.filter(testrun_id=testrun_id).order_by('created_at')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, testrun_id=self.kwargs.get('testrunpk'))

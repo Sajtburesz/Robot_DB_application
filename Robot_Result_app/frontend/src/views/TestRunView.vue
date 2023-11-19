@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex vh-100">
-    <div class="comments-section bg-light border-end">
+    <div v-if="isPublic" class="bg-light border-end">
       <CommentsComponent :teamId="this.teamId" :testRunId="this.testRunId" />
     </div>
     <div class="flex-grow-1">
@@ -25,6 +25,11 @@ export default {
             testRunId: this.$route.params.testRunId
         };
     },
+    computed: {
+    isPublic() {
+      return this.teamId !== 'public';
+    }
+  },
 
 };
 </script>

@@ -1,127 +1,136 @@
 <template>
-  <div class="d-flex vh-100">
-
+  <div class="vh-100">
     <!-- Main Content Section -->
-    <div class="main-content flex-grow-1">
-      <!-- Test Run Details -->
-      <div class="container mt-4">
-        <div class="card mb-4">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <span>Test Run Details</span>
-            <div>
-              <span class="badge" :class="`badge-${testRun.status === 'FAIL' ? 'danger' : 'success'}`">{{ testRun.status }}</span>
-              <button class="btn btn-link ms-2" @click="showTestRunDetails = !showTestRunDetails">
-                <font-awesome-icon :icon="showTestRunDetails ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" fade />
-              </button>
-            </div>
-          </div>
-          <div v-if="showTestRunDetails" class="card-body">
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <span><strong>Executed At:</strong> {{ new Date(testRun.executed_at).toLocaleString() }}</span>
-                <div>
-                  <button v-if="editMode" class="btn btn-secondary btn-sm me-2" @click="cancelEdit">Cancel</button>
-                  <button class="btn btn-primary btn-sm me-2" @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit' }}</button>
-                  <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#testRunDeleteModal">
-                    <font-awesome-icon icon="fa-solid fa-trash" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div v-if="editMode" class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" v-model="testRun.is_public">
-              <label class="form-check-label" for="flexSwitchCheckChecked">Public</label>
-            </div>
-            <div v-else>
-              <p v-if="testRun.is_public"><strong>Public Testrun</strong></p>
-            </div>
-            <ul class="list-group mb-3">
-              <li v-for="(value, key) in testRun.attributes" :key="key" class="list-group-item">
-                <strong>{{ key }}:</strong>
-                <span v-if="!editMode">{{ value || 'None' }}</span>
-                <input v-else type="text" class="form-control" v-model="testRun.attributes[key]">
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="testRunDeleteModal">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Delete Test Run</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p>Are you sure about deleting this Test Run?</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                <button type="button" class="btn btn-danger" @click="deleteTestRun()" data-bs-dismiss="modal">Yes</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Suites List -->
-        <div v-for="suite in suites" :key="suite.id" class="card mb-4">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-link text-start w-100 p-0 text-decoration-none text-dark" @click="toggleSuiteDetails(suite.id)">
-              <div class="d-flex justify-content-between align-items-center">
-                <span>{{ suite.name }}</span>
-                <div class="d-flex align-items-center">
-                  <span class="badge" :class="`badge-${suite.status === 'FAIL' ? 'danger' : 'success'}`">{{ suite.status }}</span>
-                  <font-awesome-icon class="btn btn-link ms-2" :icon="expandedSuites.includes(suite.id) ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" />
-                </div>
-              </div>
+    <div class="container mt-4">
+      <div class="card mb-4 h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Test Run Details</span>
+          <div>
+            <span class="badge" :class="`badge-${testRun.status === 'FAIL' ? 'danger' : 'success'}`">{{ testRun.status
+            }}</span>
+            <button class="btn btn-link ms-2" @click="showTestRunDetails = !showTestRunDetails">
+              <font-awesome-icon
+                :icon="showTestRunDetails ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" fade />
             </button>
           </div>
-          <div v-if="expandedSuites.includes(suite.id)" class="card-body">
-            <!-- ... Suite Details ... -->
-            <div v-for="testCase in currentSuiteDetails[suite.id]?.test_cases" :key="testCase.id"
-              class="mb-2 border-bottom border-2 pb-2">
-              <div v-if="testCase.status === 'PASS'">
-                <span class="me-2">{{ testCase.name }}</span>
-                <span class="badge" :class="`badge-${testCase.status === 'FAIL' ? 'danger' : 'success'}`">{{ testCase.status
+        </div>
+        <div v-if="showTestRunDetails" class="card-body">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span><strong>Executed At:</strong> {{ new Date(testRun.executed_at).toLocaleString() }}</span>
+              <div>
+                <button v-if="editMode && isPublic" class="btn btn-secondary btn-sm me-2" @click="cancelEdit">Cancel</button>
+                <button v-if="isPublic" class="btn btn-primary btn-sm me-2" @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit'
+                }}</button>
+                <button v-if="isPublic" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#testRunDeleteModal">
+                  <font-awesome-icon icon="fa-solid fa-trash" />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-if="editMode" class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" v-model="testRun.is_public">
+            <label class="form-check-label" for="flexSwitchCheckChecked">Public</label>
+          </div>
+          <div v-else>
+            <p v-if="testRun.is_public"><strong>Public Testrun</strong></p>
+          </div>
+          <ul class="list-group mb-3">
+            <li v-for="(value, key) in testRun.attributes" :key="key" class="list-group-item">
+              <strong>{{ key }}:</strong>
+              <span v-if="!editMode">{{ value || 'None' }}</span>
+              <input v-else type="text" class="form-control" v-model="testRun.attributes[key]">
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Delete Confirmation Modal -->
+      <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="testRunDeleteModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete Test Run</h5>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure about deleting this Test Run?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+              <button type="button" class="btn btn-danger" @click="deleteTestRun()" data-bs-dismiss="modal">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suites List -->
+      <div v-for="suite in suites" :key="suite.id" class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <button class="btn btn-link text-start w-100 p-0 text-decoration-none text-dark"
+            @click="toggleSuiteDetails(suite.id)">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>{{ suite.name }}</span>
+              <div class="d-flex align-items-center">
+                <span class="badge" :class="`badge-${suite.status === 'FAIL' ? 'danger' : 'success'}`">{{ suite.status
                 }}</span>
+                <font-awesome-icon class="btn btn-link ms-2"
+                  :icon="expandedSuites.includes(suite.id) ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" />
               </div>
-            
-              <div v-else @click="toggleTestCaseDetails(suite.id, testCase.id)"
-                class="d-flex justify-content-between align-items-center cursor-pointer">
-                <div>
-                  <span class="me-2">{{ testCase.name }}</span>
-                  <span class="badge" :class="`badge-${testCase.status === 'FAIL' ? 'danger' : 'success'}`">{{ testCase.status
-                  }}</span>
-                </div>
-                <font-awesome-icon class="btn btn-link"
-                  :icon="this.expandedTestCases.includes(testCase.id) ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" />
+            </div>
+          </button>
+        </div>
+        <div v-if="expandedSuites.includes(suite.id)" class="card-body">
+          <div v-for="testCase in currentSuiteDetails[suite.id]?.test_cases" :key="testCase.id"
+            class="mb-2 border-bottom border-2 pb-2">
+            <div v-if="testCase.status === 'PASS'">
+              <span class="me-2">{{ testCase.name }}</span>
+              <span class="badge" :class="`badge-${testCase.status === 'FAIL' ? 'danger' : 'success'}`">{{ testCase.status
+              }}</span>
+            </div>
+            <div v-else @click="toggleTestCaseDetails(suite.id, testCase.id)"
+              class="d-flex justify-content-between align-items-center cursor-pointer">
+              <div>
+                <span class="me-2">{{ testCase.name }}</span>
+                <span class="badge" :class="`badge-${testCase.status === 'FAIL' ? 'danger' : 'success'}`">{{
+                  testCase.status }}</span>
               </div>
-            
-              <!-- Test Case Details (Lazy Loaded) -->
-              <div v-if="expandedTestCases.includes(testCase.id)" class="mt-2">
-                <p class="fw-bold">Failed Keywords:</p>
-            
-                <!-- Keywords List -->
-                <div v-for="keyword in currentTestCaseDetails[testCase.id]?.keywords" :key="keyword.id"
-                  class="mb-2 border-top border-2 pt-2 ps-3">
-                  <h6 class="fw-bold">{{ keyword.name }}</h6>
-                  <div v-if="keyword.log_message.length > 2" class="ps-3">
-                    <p v-for="(line, index) in cleanResponse(keyword.log_message)" :key="index" class="message-text ">{{ line
-                    }}
-                    </p>
-                  </div>
+              <font-awesome-icon class="btn btn-link"
+                :icon="this.expandedTestCases.includes(testCase.id) ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" />
+            </div>
+            <div v-if="expandedTestCases.includes(testCase.id)" class="mt-2 keyword-detailes">
+              <p class="fw-bold">Failed Keywords:</p>
+              <div v-for="keyword in currentTestCaseDetails[testCase.id]?.keywords" :key="keyword.id"
+                class="mb-2 border-top border-2 pt-2 ps-3">
+                <h6 class="fw-bold">{{ keyword.name }}</h6>
+                <div v-if="keyword.log_message.length > 2" class="ps-3">
+                  <p v-for="(line, index) in cleanResponse(keyword.log_message)" :key="index" class="message-text">{{ line
+                  }}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Pagination Section -->
+      <nav aria-label="Suite pagination">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" :class="{ 'disabled': !prevSuitesUrl }">
+            <button class="page-link" @click="loadTestRun(this.prevSuitesUrl)"
+              :disabled="!prevSuitesUrl">Previous</button>
+          </li>
+          <li class="page-item" :class="{ 'disabled': !nextSuitesUrl }">
+            <button class="page-link" @click="loadTestRun(this.nextSuitesUrl)" :disabled="!nextSuitesUrl">Next</button>
+          </li>
+        </ul>
+      </nav>
     </div>
   </div>
 </template>
+
 
 <script>
 import { axios } from "@/common/api.service.js";
@@ -140,10 +149,18 @@ export default {
       showTestRunDetails: false,
       editMode: false,
       showDeleteConfirmation: false,
+
+      nextSuitesUrl: null,
+      prevSuitesUrl: null
     };
   },
   created() {
     this.loadTestRun();
+  },
+  computed: {
+    isPublic() {
+      return this.teamId !== 'public';
+    }
   },
   methods: {
     toggleEditMode() {
@@ -174,12 +191,13 @@ export default {
         console.error(error);
       }
     },
-    async loadTestRun() {
+    async loadTestRun(url = `/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`) {
       try {
-        const response = await axios.get(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`);
+        const response = await axios.get(url);
         this.testRun = response.data;
         this.suites = this.testRun.suites.suites;
-        console.log(response.data);
+        this.nextSuitesUrl = this.testRun.suites.next;
+        this.prevSuitesUrl = this.testRun.suites.previous;
       } catch (error) {
         console.error("Error fetching test run:", error);
       }
@@ -265,17 +283,32 @@ export default {
   border-left: 3px solid #dcdcdc;
   padding: 5px;
   margin-bottom: 5px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
   white-space: pre-wrap;
-  /* Ensure multi-line messages are displayed properly */
 }
 
 .list-group-item {
   background-color: #f7f7f7;
   border: 1px solid #dcdcdc;
+  word-wrap: break-word;
+  max-width: 100%;
 }
+
 .comments-section {
-  width: 300px; /* Adjust the width as needed */
-  height: calc(100vh - 56px); /* Adjust the height as needed, 56px for navbar if present */
+  width: 300px;
+  /* Adjust the width as needed */
+  height: calc(100vh - 56px);
+  /* Adjust the height as needed, 56px for navbar if present */
 }
-</style>
+
+.keyword-details {
+  max-width: 100%;
+  /* Ensures it doesn't overflow */
+}
+
+.keyword-details>* {
+  word-wrap: break-word;
+  /* Wraps text to prevent horizontal overflow */
+}</style>
  

@@ -6,20 +6,13 @@ urlpatterns = [
     path('upload/', views.TestRunCreateView.as_view(), name='testrun_upload'),
 
     # Retreive Testrun nonPublic
-    path('teams/<int:teamId>/test-runs/',views.TestRunListView.as_view(), name="testrun-list"),
+    path('teams/<slug:teamId>/test-runs/',views.TestRunListView.as_view(), name="testrun-list"),
     path('teams/<int:teamId>/test-runs/<int:pk>/',views.TestRunRetreiveView.as_view(), name="testrun-instance"),
+    path('teams/public/test-runs/<int:pk>/',views.TestRunRetreivePublicView.as_view(), name="testrun-instance-public"),
 
-    path('teams/<int:teamId>/test-runs/<int:testrunpk>/<int:pk>/',views.TestSuiteReteiveView.as_view(), name="suite-instance"),
+    path('teams/<slug:teamId>/test-runs/<int:testrunpk>/<int:pk>/',views.TestSuiteReteiveView.as_view(), name="suite-instance"),
 
-    path('teams/<int:teamId>/test-runs/<int:testrunpk>/<int:suitepk>/<int:pk>/',views.TestCaseRetreiveView.as_view(), name="testcase-instance"),
-
-    # Retreive Testrun Public
-    path('teams/public/test-runs/',views.PublicTestRunListView.as_view(), name="testrun-list"),
-    path('teams/public/test-runs/<int:pk>/',views.PublicTestRunRetreiveView.as_view(), name="testrun-instance"),
-
-    path('teams/public/test-runs/<int:testrunpk>/<int:pk>/',views.PublicTestSuiteReteiveView.as_view(), name="suite-instance"),
-
-    path('teams/public/test-runs/<int:testrunpk>/<int:suitepk>/<int:pk>/',views.PublicTestCaseRetreiveView.as_view(), name="testcase-instance"),
+    path('teams/<slug:teamId>/test-runs/<int:testrunpk>/<int:suitepk>/<int:pk>/',views.TestCaseRetreiveView.as_view(), name="testcase-instance"),
 
     # Attribute
     path('attributes/', views.AttributeListView.as_view(), name='attribute-list'),

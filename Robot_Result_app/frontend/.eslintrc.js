@@ -8,6 +8,7 @@ module.exports = {
     'eslint:recommended'
   ],
   parserOptions: {
+    requireConfigFile: false,
     parser: '@babel/eslint-parser'
   },
   rules: {
