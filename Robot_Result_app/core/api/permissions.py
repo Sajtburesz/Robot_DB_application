@@ -8,7 +8,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        return obj == request.user
+        return obj == request.user or request.user.is_superuser
     
 class IsTeamOwnerByPropertyOrReadOnly(permissions.BasePermission):
 

@@ -2,14 +2,17 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError
 from rest_framework import generics, status, views
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.sessions.models import Session
+from config import settings
 
-from users.api.serializers import UserDetailSelfSerializer,UserListSerializer,UserDetailOtherSerializer,UserAvatarSerializer
+from users.api.serializers import UserDetailSelfSerializer,UserListSerializer,UserDetailOtherSerializer
 from users.models import User
 from teams.api.serializers import UserTeamSerializer
 from users.api.filters import UserFilter
@@ -28,7 +31,7 @@ class UserListView(generics.ListAPIView):
 
 class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     lookup_field = 'username'
 
     def get_serializer_class(self):
@@ -70,18 +73,22 @@ class UserTeamsListView(generics.ListAPIView):
         member_teams_not_owned = user.member_teams().exclude(owner=user)
         return (owned_teams | member_teams_not_owned).order_by('id').distinct()
 
-class AvatarUpdateView(generics.RetrieveUpdateAPIView):
-    serializer_class = UserAvatarSerializer
-    permission_classes = [IsOwnerOrReadOnly]  
 
-    def get_queryset(self):
-        return User.objects.all()
+class AvatarSelectionView(views.APIView):
+    def get(self, request, *args, **kwargs):
+        avatars = ['avatar1.png', 'avatar2.png', 'avatar3.png', 'avatar4.png','default.png']
+        return Response({'avatars': avatars}, status=status.HTTP_200_OK)
 
-    def get_object(self):
-        return get_object_or_404(User, username=self.kwargs.get('username'))
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        avatar_choice = request.data.get('avatar')
 
-    def delete(self, request, *args, **kwargs):
-        return Response({"detail": "Deletion not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        if avatar_choice in ['avatar1.png', 'avatar2.png', 'avatar3.png','avatar4.png', 'default.png']:
+            user.avatar = avatar_choice
+            user.save()
+            return Response({'message': 'Avatar updated successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid avatar choice.'}, status=status.HTTP_400_BAD_REQUEST)
     
 class GetAdminStatusView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -175,3 +182,24 @@ class ManageAdminRightsAPIView(views.APIView):
             memberships_to_create.append(TeamMembership(team=team, user=user))
 
         TeamMembership.objects.bulk_create(memberships_to_create)
+
+
+class ChangePasswordView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        old_password = request.data.get("old_password")
+        new_password = request.data.get("new_password")
+
+        if not user.check_password(old_password):
+            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            validate_password(new_password, user)
+        except ValidationError as e:
+            return Response({"new_password": list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
