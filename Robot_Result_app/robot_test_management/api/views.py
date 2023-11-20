@@ -51,17 +51,16 @@ class TestRunListView(generics.ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TestRunFilter
     
-    def get_queryset(self):
+    def get_queryset(self):        
         team_id = self.kwargs.get('teamId')
         if team_id == "public":
             return TestRun.objects.filter(is_public=True).order_by('-executed_at')
-        else:
+        elif team_id is not None:
             try:
-                team_id = int(team_id)  # Convert team_id to an integer
                 return TestRun.objects.filter(team_id=team_id).order_by('-executed_at')
             except ValueError:
                 return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
-
+        
 
     def get_permissions(self):
         team_id = self.kwargs.get('teamId')
@@ -100,7 +99,6 @@ class TestSuiteReteiveView(generics.RetrieveAPIView):
             return TestSuite.objects.filter(test_run__is_public=True).prefetch_related('test_cases')
         else:
             try:
-                team_id = int(team_id)
                 return TestSuite.objects.filter(test_run__team_id=team_id).prefetch_related('test_cases')
             except ValueError:
                 return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
@@ -123,7 +121,6 @@ class TestCaseRetreiveView(generics.RetrieveAPIView):
             return TestCase.objects.filter(suite__test_run__is_public=True).prefetch_related('keywords')
         else:
             try:
-                team_id = int(team_id)
                 return TestCase.objects.filter(suite__test_run__team_id=team_id).prefetch_related('keywords')
             except ValueError:
                 return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
@@ -139,13 +136,13 @@ class TestCaseRetreiveView(generics.RetrieveAPIView):
 
 # Attribute Views 
 class AttributeListView(generics.ListAPIView):
-    queryset = Attributes.objects.all()
+    queryset = Attributes.objects.all().order_by('key_name')
     serializer_class = AttributeSerializer
 
     permission_classes=[IsAuthenticated]
 
 class AttributeCreateView(generics.ListCreateAPIView):
-    queryset = Attributes.objects.all()
+    queryset = Attributes.objects.all().order_by('key_name')
     serializer_class = AttributeSerializer
 
     permission_classes=[IsAuthenticated, IsAdmin]
@@ -158,7 +155,7 @@ class AttributeCreateView(generics.ListCreateAPIView):
         serializer.save()
 
 class AttributeEditView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Attributes.objects.all()
+    queryset = Attributes.objects.all().order_by('key_name')
     serializer_class = AttributeSerializer
 
     permission_classes=[IsAuthenticated,IsAdmin]

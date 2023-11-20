@@ -78,7 +78,7 @@
 
 <script>
 import { axios } from "@/common/api.service.js";
-import Cookies from "js-cookie";
+
 
 export default {
   data() {
@@ -90,8 +90,9 @@ export default {
   },
   async created() {
     try {
-      let loggedInUsername = Cookies.get('username');
-      const response = await axios.get('/api/v1/users/' + loggedInUsername +'/');
+      const username = await axios.get("/auth/users/me/");
+      console.log(username);
+      const response = await axios.get('/api/v1/users/' + username.data.username +'/');
       this.user = response.data;
       this.editableUser = { ...this.user };  // Clone user data for editing
     } catch (error) {
@@ -104,8 +105,9 @@ export default {
     },
     async updateProfile() {
       try {
-        let loggedInUsername = Cookies.get('username');
-        const response = await axios.put('/api/v1/users/' + loggedInUsername + "/", this.editableUser);
+        const username = await axios.get("/auth/users/me/");
+        console.log(username);
+        const response = await axios.put('/api/v1/users/' + username.data.username + "/", this.editableUser);
         this.user = response.data;
         this.editMode = false;
       } catch (error) {

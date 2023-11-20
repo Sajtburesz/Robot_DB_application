@@ -60,9 +60,9 @@ export default {
         };
     },
     async created() {
-        let username = this.getCookie('username');
+        const username = await axios.get("/auth/users/me/");
 
-        const response = await axios.get("/api/v1/users/" + username + "/teams/");
+        const response = await axios.get("/api/v1/users/" + username.data.username + "/teams/");
 
         this.nextUrl = response.data.next;
         this.prevUrl = response.data.previous;
@@ -80,11 +80,7 @@ export default {
 
             this.teams = response.data.results;
         },
-        getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        },
+
     }
 }
 </script>

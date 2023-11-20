@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from teams.models import Team,TeamMembership
 from django.contrib.auth import get_user_model
-
+from django.db.models import Q
+from django.db import transaction
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
@@ -16,6 +17,8 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             return "Owner"
         elif obj.is_maintainer:
             return "Maintainer"
+        elif obj.user.is_staff or obj.user.is_superuser:
+            return "Admin"
         else:
             return "Member"
 
@@ -41,18 +44,21 @@ class TeamSerializer(serializers.ModelSerializer):
         # Get authenticated user
         owner = self.context['request'].user
         validated_data['owner'] = owner
-        team = Team.objects.create(**validated_data)
-        
-        # Add the owner
-        TeamMembership.objects.get_or_create(team=team, user=owner)
-        
-        # Add all admin users
-        admin_users = get_user_model().objects.filter(is_superuser=True)
 
-        for admin_user in admin_users:
-            TeamMembership.objects.get_or_create(team=team, user=admin_user)
+        with transaction.atomic():
+            team = Team.objects.create(**validated_data)
+            
+            # Add the owner
+            TeamMembership.objects.get_or_create(team=team, user=owner)
+            
+            # Add all admin users
+            admin_users = get_user_model().objects.filter(Q(is_staff=True) | Q(is_superuser=True))
+
+            for admin_user in admin_users:
+                TeamMembership.objects.get_or_create(team=team, user=admin_user)
 
         return team
+
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)

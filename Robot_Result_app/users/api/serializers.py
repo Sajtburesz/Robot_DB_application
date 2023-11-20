@@ -20,7 +20,7 @@ class UserDetailSelfSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username']
+        fields = ['username','is_staff','is_superuser']
 
 
 class UserDetailOtherSerializer(serializers.ModelSerializer):
@@ -34,3 +34,4 @@ class UserAvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("avatar",)
+

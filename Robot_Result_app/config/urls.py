@@ -14,12 +14,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+
 from django.urls import path, include, re_path
 from django_registration.backends.one_step.views import RegistrationView
 
 from users.forms import UserForm
 from core.views import IndexTemplateView
+
+from django.contrib.auth.views import LoginView, LogoutView
+from users.api.views import GetSelfUsernameView,ManageAdminRightsAPIView,ResetPasswordView
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -39,12 +42,11 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
-    # TODO: Only include users/me and usrs/set_password!!
-    path("auth/", include("djoser.urls")),
+    # TODO: Only include usrs/set_password!!
     path("auth/", include("djoser.urls.authtoken")),
-
+    
+    path('auth/users/me/', GetSelfUsernameView.as_view(), name='logged-in-user-username'),
     path(
         "accounts/register/",
         RegistrationView.as_view(
@@ -53,16 +55,20 @@ urlpatterns = [
         ),
         name="django_registration_register",
     ),
-    path("accounts/", include("django.contrib.auth.urls")),
+
+    path("accounts/login/", LoginView.as_view(), name="login"),
+    path("accounts/logout/", LogoutView.as_view(), name="logout"),
 
     path("api/v1/", include("users.api.urls")),
     path("api/v1/", include("robot_test_management.api.urls")),
     path("api/v1/", include("teams.api.urls")),
 
+    # admin
+    path('admin/reset-password/',ResetPasswordView.as_view(),name='reset-password-of-user'),
+    path('admin/manage-admin/',ManageAdminRightsAPIView.as_view(),name='manage-admin-users'),
+
     # doc
     path('api/v1/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-
-    path("__debug__/", include("debug_toolbar.urls")),
 
     # Keep it as last url entry
     re_path(r"^.*$", IndexTemplateView.as_view(), name="entry-point"),

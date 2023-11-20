@@ -28,7 +28,7 @@
             <router-link class="nav-link fw-bold shadow p-2 mb-1 bg-body rounded upload-navlink upload-navlink-animation" :to="{ name: 'CreateTestRunView' }">Upload</router-link>
           </li>
           <li class="nav-item" v-if="isAdmin">
-                      <a class="nav-link fw-bold" href="#">Admin</a>
+            <router-link class="nav-link fw-bold" :to="{ name: 'ManageAttributesView' }">Admin</router-link>
           </li>
         </ul>
         <!-- Left links -->
@@ -66,6 +66,7 @@ export default {
   name: "NavBarComponent",
   computed: {
     isAdmin() {
+      this.$store.dispatch('fetchAdminStatus');
       return this.$store.state.isAdmin;
     }
   }

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import store from '../store/index.js'
 
 const routes = [
   {
@@ -48,11 +49,37 @@ const routes = [
     name: 'CompareTestRunView',
     component: () => import('../views/CompareTestRunsView.vue'),
   },
+  {
+    path: '/admin_page/attributes/',
+    name: 'ManageAttributesView',
+    meta: { requiresAdmin: true },
+    component: () => import('../views/ManageAttributesAdminView.vue'),
+  },
+  {
+    path: '/admin_page/users/',
+    name: 'ManageUsersView',
+    meta: { requiresAdmin: true },
+    component: () => import('../views/ManageUsersAdminView.vue'),
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory("/"),
   routes
 })
+
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    await store.dispatch('fetchAdminStatus');
+    if (store.state.isAdmin) {
+      next();
+    } else {
+      next({ path: '/' }); // Redirect to a different route
+    }
+  } else {
+    next();
+  }
+});
+
 
 export default router
