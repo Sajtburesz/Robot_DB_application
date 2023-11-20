@@ -17,7 +17,7 @@ class IsTeamOwnerByPropertyOrReadOnly(permissions.BasePermission):
             return True
         
         if request.method == 'DELETE':
-            return request.user.is_superuser or obj.owner == request.user
+            return request.user.is_superuser or obj.owner == request.user or request.user.is_staff
         
 
         if isinstance(obj, TeamMembership):
@@ -34,7 +34,7 @@ class IsTeamOwnerByPropertyOrReadOnly(permissions.BasePermission):
         is_maintainer = membership and membership.is_maintainer
         
         # Return True if the user is the owner, a maintainer, staff, or a superuser
-        return team.owner == request.user or is_maintainer or request.user.is_superuser
+        return team.owner == request.user or is_maintainer or request.user.is_superuser or request.user.is_staff
 
     
 class IsTeamMember(permissions.BasePermission):
@@ -44,11 +44,11 @@ class IsTeamMember(permissions.BasePermission):
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.owner or request.user.is_superuser
+        return request.user == obj.owner or request.user.is_superuser or request.user.is_staff
     
 class IsAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user.is_superuser
+        return request.user.is_superuser or request.user.is_staff
     
 
 class IsTeamMemberOfRelatedTeam(permissions.BasePermission):
@@ -65,4 +65,4 @@ class IsTeamMemberOfRelatedTeam(permissions.BasePermission):
 class IsCommentAuthorOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.author == request.user or request.user.is_superuser
+        return obj.author == request.user or request.user.is_superuser or request.user.is_staff

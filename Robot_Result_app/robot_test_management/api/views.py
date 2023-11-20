@@ -139,13 +139,13 @@ class TestCaseRetreiveView(generics.RetrieveAPIView):
 
 # Attribute Views 
 class AttributeListView(generics.ListAPIView):
-    queryset = Attributes.objects.all()
+    queryset = Attributes.objects.all().order_by('key_name')
     serializer_class = AttributeSerializer
 
     permission_classes=[IsAuthenticated]
 
 class AttributeCreateView(generics.ListCreateAPIView):
-    queryset = Attributes.objects.all()
+    queryset = Attributes.objects.all().order_by('key_name')
     serializer_class = AttributeSerializer
 
     permission_classes=[IsAuthenticated, IsAdmin]
@@ -158,7 +158,7 @@ class AttributeCreateView(generics.ListCreateAPIView):
         serializer.save()
 
 class AttributeEditView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Attributes.objects.all()
+    queryset = Attributes.objects.all().order_by('key_name')
     serializer_class = AttributeSerializer
 
     permission_classes=[IsAuthenticated,IsAdmin]

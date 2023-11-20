@@ -55,8 +55,6 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_yasg",
 
-    "debug_toolbar",
-    
 ]
 
 MIDDLEWARE = [
@@ -68,11 +66,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
-
-
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # TODO: Remove debug tool
 ]
 INTERNAL_IPS = [
     # ...

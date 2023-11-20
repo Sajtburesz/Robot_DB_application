@@ -5,12 +5,16 @@
             <div class="row">
                 <!-- Left side: Team Name and Editing -->
                 <div class="col-6 text-start">
-                    <div v-if="!editingName" @click="startEditingName">
+                    <div v-if="!editingName && (owner || maintainer || isAdmin)" style="cursor: pointer;" @click="startEditingName">
                         <h1>
                             {{ team.name }}
-                            <!-- Show edit icon only if owner, maintainer, or isAdmin -->
-                            <i v-if="owner || maintainer || isAdmin" class="fa fa-pencil fs-6" style="cursor: pointer;"
+                            <i class="fa fa-pencil fs-6" style="cursor: pointer;"
                                 @click="startEditingName" aria-hidden="true"></i>
+                        </h1>
+                    </div>
+                    <div v-else-if="!editingName">
+                        <h1>
+                            {{ team.name }}
                         </h1>
                     </div>
                     <div v-else>
@@ -103,20 +107,19 @@
                     </div>
                     <!-- Second Part: Role -->
                     <div class="col-4 d-flex justify-content-center">
-                        <div v-if="owner || maintainer || isAdmin">
-                            <div v-if="member.role !== 'Owner'">
+                        <div>
+                            <div v-if="member.role !== 'Owner' && member.role !== 'Admin' && (owner || maintainer || isAdmin)">
                                 <MemberRoleComponent :member="member" :roles="roles" @role-changed="handleRoleChange">
                                 </MemberRoleComponent>
                             </div>
-                            <span v-else>Owner</span>
+                            <span v-else>{{ member.role }}</span>
                         </div>
-                        <span v-else>{{ member.role }}</span>
                     </div>
 
                     <!-- Third Part: Remove Button -->
                     <div class="col-4 d-flex justify-content-end">
                         <button
-                            v-if="(maintainer || owner || isAdmin) && member.role != 'Owner' && member.username !== currentUser"
+                            v-if="(maintainer || owner || isAdmin) && member.role != 'Owner' && member.role != 'Admin' && member.username !== this.currentUsername"
                             class="btn btn-danger ms-2" @click="removeMember(member.username)">
                             Remove from team
                         </button>
@@ -133,8 +136,6 @@
 <script>
 import 'font-awesome/css/font-awesome.css'
 import { axios } from "@/common/api.service.js";
-
-import Cookies from "js-cookie";
 
 import UserSearchComponent from "@/components/UserSearch.vue";
 import MemberRoleComponent from "@/components/MemberRole.vue";
@@ -161,6 +162,7 @@ export default {
             querried_users: [],
             team: {},
             members: {},
+            currentUsername: null,
         };
     },
     async created() {
@@ -174,7 +176,10 @@ export default {
                 role: member.role
             }
         });
-        if (response.data.owner === Cookies.get("username")) {
+        
+        const username = this.currentUser();
+    
+        if (response.data.owner === username) {
             this.owner = true;
         }
         this.maintainer = response.data.is_maintainer;
@@ -183,13 +188,16 @@ export default {
     },
     computed: {
         isAdmin() {
+            this.$store.dispatch('fetchAdminStatus');
             return this.$store.state.isAdmin;
         },
-        currentUser() {
-            return Cookies.get('username');
-        }
     },
     methods: {
+        async currentUser() {
+            const username = await axios.get("/auth/users/me/");
+            this.currentUsername = username.data.username;
+            return username.data.username;
+        },
         async handleRoleChange(payload) {
             const { member, newRole } = payload;
 
