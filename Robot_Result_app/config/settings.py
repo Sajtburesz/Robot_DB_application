@@ -52,7 +52,10 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_registration",
     "djoser",
-    "django_filters"
+    "django_filters",
+    "drf_yasg",
+
+    "debug_toolbar",
     
 ]
 
@@ -66,6 +69,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'core.api.auth_cookie_middleware.UsernameCookieMiddleware',
+
+
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # TODO: Remove debug tool
+]
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -94,8 +106,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'robot_db',
+        'USER': 'django_backend',
+        'PASSWORD': 'super_secret_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -139,6 +155,7 @@ LOGOUT_REDIRECT_URL = "/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
@@ -161,6 +178,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "core.pagination.PageNumberPaginationNoCount",
-    "PAGE_SIZE": 5,
+    "PAGE_SIZE": 10,
 }
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

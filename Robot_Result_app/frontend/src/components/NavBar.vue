@@ -19,13 +19,13 @@
         <!-- Left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link fw-bold" href="#">Dashboard</a>
+            <router-link class="nav-link fw-bold" :to="{ name: 'ListTestRunsView' }">Test Runs</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link fw-bold" :to="{ name: 'CreateTeamView' }">Team</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-bold" href="#">Projects</a>
+            <router-link class="nav-link fw-bold shadow p-2 mb-1 bg-body rounded upload-navlink upload-navlink-animation" :to="{ name: 'CreateTestRunView' }">Upload</router-link>
           </li>
           <li class="nav-item" v-if="isAdmin">
                       <a class="nav-link fw-bold" href="#">Admin</a>
@@ -71,3 +71,16 @@ export default {
   }
 };
 </script>
+
+<style>
+
+.upload-navlink-animation {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.upload-navlink:hover{
+  background-color: #3a6f8fff !important; 
+  color: #f7f7f7ff !important;
+}
+
+</style>

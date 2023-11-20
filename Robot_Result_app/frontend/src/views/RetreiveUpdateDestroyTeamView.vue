@@ -47,13 +47,14 @@
                             <div class="modal-body">
                                 <!-- User Search Component -->
                                 <div class="d-flex justify-content-center">
-                                <UserSearchComponent v-on:set-users="setUsers" v-on:set-loading="setLoading"></UserSearchComponent>
-                            </div>
+                                    <UserSearchComponent v-on:set-users="setUsers" v-on:set-loading="setLoading">
+                                    </UserSearchComponent>
+                                </div>
                                 <div v-if="isLoading" class="d-flex justify-content-center my-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
                                 <!-- Users List Table -->
                                 <table v-else class="table table-striped mt-3">
                                     <thead v-if="querried_users.length !== 0">
@@ -97,10 +98,9 @@
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 border-2">
 
                     <!-- First Part: Username -->
-                    <!-- TODO: ADD router link to retreive users profile and edit retreive profile view to take props -->
-                        <div class="col-4 d-flex justify-content-start">
-                            <span class="fw-bold">{{ member.username }}</span>
-                        </div>
+                    <div class="col-4 d-flex justify-content-start">
+                        <span class="fw-bold">{{ member.username }}</span>
+                    </div>
                     <!-- Second Part: Role -->
                     <div class="col-4 d-flex justify-content-center">
                         <div v-if="owner || maintainer || isAdmin">
@@ -132,8 +132,8 @@
   
 <script>
 import 'font-awesome/css/font-awesome.css'
-
 import { axios } from "@/common/api.service.js";
+
 import Cookies from "js-cookie";
 
 import UserSearchComponent from "@/components/UserSearch.vue";
@@ -235,7 +235,7 @@ export default {
                 this.editingName = false;
             } catch (error) {
                 this.$toast.error('You do not have permission to access this resource.', {
-                    duration: 5000,
+                    duration: 4000,
                 });
             }
         },
@@ -248,9 +248,9 @@ export default {
         },
         setUsers(userQuery) {
             this.querried_users = userQuery;
-        },      
+        },
         setLoading(bool) {
-            console.log("alma:"+bool);
+            console.log("alma:" + bool);
             this.isLoading = bool;
         },
         async addMember(username) {
