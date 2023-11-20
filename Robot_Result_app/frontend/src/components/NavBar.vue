@@ -40,7 +40,7 @@
         <!-- Avatar -->
         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownMenuLink" type="button"
           data-bs-toggle="dropdown" aria-expanded="false">
-          <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp" class="rounded-circle" height="50"
+          <img v-if="getAvatar" :src="`/static/avatars/${getAvatar}`" class="rounded-circle" height="50"
             alt="Portrait of a Woman" loading="lazy" />
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
@@ -62,12 +62,31 @@
 </template>
 
 <script>
+import { axios } from "@/common/api.service.js";
+
 export default {
   name: "NavBarComponent",
+  created() {
+    this.fetchAvatar(); // Fetch avatar when component is created
+  },
   computed: {
     isAdmin() {
       this.$store.dispatch('fetchAdminStatus');
       return this.$store.state.isAdmin;
+    },
+    getAvatar() {
+      return this.$store.state.avatar;
+    },
+  },
+  methods:{
+    async fetchAvatar(){
+      try{
+        const user = await axios.get('/auth/users/me/');
+        const avatar = await axios.get(`/api/v1/users/${user.data.username}/`);
+        this.$store.dispatch('setAvatar',avatar.data.avatar);
+      }catch(error){
+        this.$toast.error("Something went wrong when fetching avatar.");
+      }
     }
   }
 };

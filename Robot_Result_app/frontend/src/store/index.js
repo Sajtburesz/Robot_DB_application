@@ -6,7 +6,8 @@ export default createStore({
     isAdmin: false,
     isSuperUser: false,
     testRuns: [],
-    wayOfAccess: []
+    wayOfAccess: [],
+    avatar: "",
   },
   mutations: {
     SET_ADMIN_STATUS(state, status) {
@@ -21,6 +22,9 @@ export default createStore({
     setWayOfAccess(state, id) {
       state.wayOfAccess = id;
     },
+    updateAvatar(state, avatar) {
+      state.avatar = avatar;
+    }
   },
   actions: {
     updateAdminStatus({ commit }, status) {
@@ -34,6 +38,9 @@ export default createStore({
     },
     setWayOfAccess(context, id) {
       context.commit('setWayOfAccess', id);
+    },
+    setAvatar(context, avatar) {
+      context.commit('updateAvatar', avatar);
     },
     async fetchAdminStatus(context) {
       try {

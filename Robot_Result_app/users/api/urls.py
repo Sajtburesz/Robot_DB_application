@@ -1,17 +1,18 @@
 from django.urls import include, path
 
-from users.api.views import (AvatarUpdateView,
+from users.api.views import (AvatarSelectionView,
                              UserRetrieveUpdateDestroyView,
                              UserListView,
                              UserTeamsListView,
-                             GetAdminStatusView)
+                             GetAdminStatusView,
+                             ChangePasswordView)
 
 
 urlpatterns = [
     path('users/', UserListView.as_view(), name='user-list'),
     path('users/<str:username>/',UserRetrieveUpdateDestroyView.as_view(), name='user-detail'),
     path('users/<str:username>/teams/', UserTeamsListView.as_view(), name='user-teams-list'),
-    path("avatar/<str:username>/", AvatarUpdateView.as_view(), name="avatar"),
+    path("avatar/change/", AvatarSelectionView.as_view(), name="avatar"),
     path("check-admin-status/", GetAdminStatusView.as_view(), name="admin-status"),
-
+    path("change-password/", ChangePasswordView.as_view(), name="change-password"),
 ]

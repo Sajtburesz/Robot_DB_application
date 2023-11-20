@@ -7,8 +7,9 @@ class UserDetailSelfSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name','description')
-    
+        fields = ('username', 'email', 'first_name', 'last_name','description','avatar')
+        read_only_fields = ('avatar',)
+        
     def __init__(self, *args, **kwargs):
         super(UserDetailSelfSerializer, self).__init__(*args, **kwargs)
 
@@ -27,11 +28,4 @@ class UserDetailOtherSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'description']
-
-
-class UserAvatarSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ("avatar",)
 

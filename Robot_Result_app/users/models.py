@@ -11,7 +11,7 @@ class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
 
     description = models.CharField(max_length=240, blank=True)
-    avatar = models.ImageField(null=True, blank=True)
+    avatar = models.CharField(max_length=255, default='default.png')
 
     REQUIRED_FIELDS = ["first_name","last_name","email"]
 
