@@ -20,7 +20,9 @@ class TestRun(models.Model):
 class TestSuite(models.Model):
     name = models.CharField(max_length=255)
     test_run = models.ForeignKey(TestRun, on_delete=models.CASCADE, related_name='suites')
-
+    class Meta:
+            ordering = ['id']
+            
 class TestCase(models.Model):
     name = models.CharField(max_length=255)
     status = models.CharField(max_length=10, null=True, blank=True)
