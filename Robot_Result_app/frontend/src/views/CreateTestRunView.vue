@@ -14,7 +14,7 @@
                     </button>
                     <div class="dropdown-menu w-100" aria-labelledby="team-dropdown">
                         <div class="p-2">
-                            <input type="text" class="form-control mb-2 bg-seasalt text-jet" v-model="teamFilter"
+                            <input type="text" id="filter" class="form-control mb-2 bg-seasalt text-jet" v-model="teamFilter"
                                 placeholder="Type to filter..." @input="filterTeams()">
                         </div>
                         <ul class="list-group overflow-auto" style="max-height: 200px;">

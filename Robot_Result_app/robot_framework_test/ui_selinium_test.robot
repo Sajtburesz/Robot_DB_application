@@ -1,5 +1,6 @@
 *** Settings ***
 Library  SeleniumLibrary
+Library    OperatingSystem
 Suite Setup    Open Browser To Login Page
 Suite Teardown  Close Browser
 
@@ -21,9 +22,7 @@ User Registration to Test Run Management
     Create And Register User
     Create Team
     Upload Test Run
-    # Edit Test Run To Public
-    # Delete Test Run
-    # Delete Team
+    Edit Test Run To Public
     # Delete User
 
 *** Keywords ***
@@ -50,20 +49,30 @@ Create Team
 
 Upload Test Run
     Go To  ${UPLOAD_URL}
-    Select From List By Label  teamDropdown  RobotFrameworkTestTeam
-    Choose File  id:outputFile  test_data/output_2.xml
-    Click Button  xpath://button[@type='submit']
-    # Wait Until Element Is Visible  upload_success_message
+
+    # select team
+    Click Element    id=team-dropdown
+    Wait Until Element Is Visible    id=filter
+    Input Text    id=filter    RobotFrameworkTestTeam
+    Wait Until Element Is Visible    //li[contains(text(),'RobotFrameworkTestTeam')]
+    Click Element    //li[contains(text(),'RobotFrameworkTestTeam')]
+
+
+    ${relative_file_path} =    Set Variable    ../test_data/output_2.xml
+    ${absolute_file_path} =    Join Path    ${CURDIR}    ${relative_file_path}
+
+    Choose File    id=outputFile    ${absolute_file_path}
+    Click Element    //button[contains(text(),'Upload Test Run')]
+
+    Wait Until Element Is Visible    //div[contains(text(),'Upload Successfull')]
+    Element Should Contain    //div[contains(text(),'Upload Successfull')]    Upload Successfull
 
 Edit Test Run To Public
+    Go To    ${TEST_RUN_URL}
     Click Element  edit_test_run_button
     Select Checkbox  public_checkbox
     Click Button  save_button
     Wait Until Element Is Visible  edit_success_message
-
-# Delete Test Run
-#     Click Element  delete_test_run_button
-#     Confirm Action  # Implement a keyword to handle confirmation dialogs
 
 # Delete Team
 #     Go To  ${HOME_URL}/teams
