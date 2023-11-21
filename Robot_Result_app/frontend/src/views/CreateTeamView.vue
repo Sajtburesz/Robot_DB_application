@@ -45,16 +45,12 @@ export default {
                 };
                 const response = await axios.post('/api/v1/teams/create/', payload);
                
-               if (response.status === 201) {
-                    let teamId = response.data.id;
-                    this.$router.push('/manage-team/' + teamId + '/');
-                } else {
-                    console.log("ERROR");
-                }
 
+                let teamId = response.data.id;
+                this.$router.push('/manage-team/' + teamId + '/');
+                
             } catch (error) {
-                console.error("Error creating team:", error);
-                //TODO: Handle the error, maybe show an error message to the user
+                this.$toast.error(`Error creating team.`);
             }
         }
     }

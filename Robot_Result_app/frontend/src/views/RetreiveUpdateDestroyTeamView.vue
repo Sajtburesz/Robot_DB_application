@@ -74,7 +74,7 @@
                                             <td v-else>-</td>
                                             <td>
                                                 <button v-if="!containsUsername(user.username)" type="button"
-                                                    class="btn btn-sm btn-primary" @click="addMember(user.username)">Add
+                                                    class="btn btn-sm bg-ucla-blue clickable-item text-seasalt" @click="addMember(user.username)">Add
                                                     Member</button>
                                             </td>
                                         </tr>
@@ -258,7 +258,7 @@ export default {
             this.querried_users = userQuery;
         },
         setLoading(bool) {
-            console.log("alma:" + bool);
+            
             this.isLoading = bool;
         },
         async addMember(username) {

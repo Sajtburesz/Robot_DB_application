@@ -38,8 +38,11 @@
 
         <div class="row">
             <div class="col vh-100 overflow-auto">
-                <apexchart v-if="loaded" type="rangeBar" :options="chartOptions" ref="myChart" :series="rawSeries">
+                <apexchart v-if="loaded && this.series[0].data.length" type="rangeBar" :options="chartOptions" ref="myChart" :series="rawSeries">
                 </apexchart>
+                <div v-else class="no-data-message">
+                    No data available with these parameters.
+                </div>
             </div>
         </div>
     </div>
@@ -151,12 +154,15 @@ export default {
                     url = response.data.next;
                 }
                 this.teams = allTeams;
-                this.filteredTeams = allTeams;
+
+                this.teams.unshift({id: 'public', name: 'public'});
+
+                this.filteredTeams = this.teams;
                 this.selectedTeam = this.teams[0]?.id;
                 this.selectedTeamName = this.teams[0]?.name;
 
             } catch (error) {
-                console.error("Error fetching user teams:", error);
+                this.$toast.error(`Error fetching user teams.`);
             }
         },
         async fetchDateRange() {
@@ -164,10 +170,11 @@ export default {
                 const response = await axios.get(`/api/v1/date-range/${this.selectedTeam}/`);
                 this.minDate = response.data.min_date.split('T')[0];
                 this.maxDate = response.data.max_date.split('T')[0];
-                this.startDate = this.minDate; // Set the start date to the oldest date
+                this.startDate = this.minDate; 
                 await this.fetchTimelineData();
             } catch (error) {
-                console.error("Error fetching heatmap date range:", error);
+                this.series = [{data:[]}];
+                this.$toast.error(`Error fetching heatmap date range.`);
             }
         },
 
@@ -208,7 +215,7 @@ export default {
 
                     this.loaded = true;
                 } catch (error) {
-                    console.error("Error fetching timeline data:", error);
+                    this.$toast.error(`Error fetching timeline data.`);
                 }
             }
         },

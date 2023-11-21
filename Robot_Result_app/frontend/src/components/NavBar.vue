@@ -13,7 +13,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <!-- Navbar brand -->
         <router-link class="navbar-brand mt-lg-o" :to="{ name: 'home' }">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Robot-framework-logo.png" height="40"
+          <img src="/static/images/Robot-framework-logo.png" height="40"
             alt="MDB Logo" loading="lazy" />
         </router-link>
         <!-- Left links -->

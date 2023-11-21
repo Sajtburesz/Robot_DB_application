@@ -32,7 +32,7 @@
                                                     <button class="btn btn-link ms-2" @click="toggleCardExpansion(user)">
                                                         <font-awesome-icon
                                                             :icon="user.isExpanded ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'"
-                                                            fade />
+                                                             />
                                                     </button>
                                                 </div>
                                             </div>
@@ -53,7 +53,7 @@
                                                                 placeholder="Confirm New Password"
                                                                 autocomplete="new-password">
                                                             <div class=" d-flex justify-content-center align-items-center">
-                                                                <button class="btn btn-primary" type="submit">Reset
+                                                                <button class="btn bg-ucla-blue clickable-item text-seasalt" type="submit">Reset
                                                                     Password</button>
                                                             </div>
                                                         </form>
@@ -177,7 +177,7 @@ export default {
                 this.prevUrl = response.data.previous;
                 this.users = response.data.results.map(user => ({ ...user, isExpanded: false }));
             } catch (error) {
-                console.error("Error fetching users:", error);
+                this.$toast.error(`Error fetching users.`);
             }
         },
         handleFilterChange() {
@@ -199,7 +199,7 @@ export default {
                     this.$toast.success(`Reseting password for ${user.username} was succesfull.`);
                 } catch (error) {
                     this.$toast.error(`Unable to reset password for ${user.username}.`);
-                    console.log(error);
+                    
                 }
             } else {
                 this.$toast.error(`Passwords do not match.`);

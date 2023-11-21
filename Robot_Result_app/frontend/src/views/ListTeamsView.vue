@@ -66,7 +66,7 @@ export default {
 
         this.nextUrl = response.data.next;
         this.prevUrl = response.data.previous;
-        console.log(response.data);
+        
         this.teams = response.data.results;
 
     },

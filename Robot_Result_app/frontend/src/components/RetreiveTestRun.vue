@@ -3,14 +3,14 @@
     <!-- Main Content Section -->
     <div class="container mt-4">
       <div class="card mb-4 h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span>Test Run Details</span>
+        <div class="detailes-header d-flex justify-content-between align-items-center ps-2 pe-3">
+          <span>{{ `#${testRun.id}` }} Test Run Details</span>
           <div>
             <span class="badge" :class="`badge-${testRun.status === 'FAIL' ? 'danger' : 'success'}`">{{ testRun.status
             }}</span>
             <button class="btn btn-link ms-2" @click="showTestRunDetails = !showTestRunDetails">
               <font-awesome-icon
-                :icon="showTestRunDetails ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" fade />
+                :icon="showTestRunDetails ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" />
             </button>
           </div>
         </div>
@@ -19,9 +19,9 @@
             <div class="d-flex justify-content-between align-items-center">
               <span><strong>Executed At:</strong> {{ new Date(testRun.executed_at).toLocaleString() }}</span>
               <div>
-                <button v-if="editMode && isPublic" class="btn btn-secondary btn-sm me-2" @click="cancelEdit">Cancel</button>
-                <button v-if="isPublic" class="btn btn-primary btn-sm me-2" @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit'
+                <button v-if="isPublic" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm me-2" @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit'
                 }}</button>
+                <button v-if="editMode && isPublic" class="btn btn-secondary btn-sm me-2" @click="cancelEdit">Cancel</button>
                 <button v-if="isPublic" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#testRunDeleteModal">
                   <font-awesome-icon icon="fa-solid fa-trash" />
                 </button>
@@ -180,7 +180,7 @@ export default {
       try {
         await axios.put(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`, this.testRun);
       } catch (error) {
-        console.error(error);
+        this.$toast.error(`Error updating testrun details.`);
       }
     },
     async deleteTestRun() {
@@ -188,7 +188,7 @@ export default {
         await axios.delete(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`);
         this.$router.push({ name: 'ListTestRunsView' });
       } catch (error) {
-        console.error(error);
+        this.$toast.error(`Error during deleting testrun.`);
       }
     },
     async loadTestRun(url = `/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`) {
@@ -199,7 +199,7 @@ export default {
         this.nextSuitesUrl = this.testRun.suites.next;
         this.prevSuitesUrl = this.testRun.suites.previous;
       } catch (error) {
-        console.error("Error fetching test run:", error);
+        this.$toast.error(`Error fetching test run.`);
       }
     },
     toggleSuiteDetails(suiteId) {
@@ -215,10 +215,10 @@ export default {
       if (!this.currentSuiteDetails[suiteId]) {
         try {
           const response = await axios.get(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/${suiteId}/`);
-          console.log(response.data);
+          (response.data);
           this.currentSuiteDetails[suiteId] = response.data;
         } catch (error) {
-          console.error("Error fetching suite details:", error);
+          this.$toast.error(`Error fetching suite details.`);
         }
       }
     },
@@ -235,10 +235,10 @@ export default {
       if (!this.currentTestCaseDetails[testCaseId]) {
         try {
           const response = await axios.get(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/${suiteId}/${testCaseId}/`);
-          console.log(response.data);
+          (response.data);
           this.currentTestCaseDetails[testCaseId] = response.data;
         } catch (error) {
-          console.error("Error fetching test case details:", error);
+          this.$toast.error(`Error fetching test case details.`);
         }
       }
     },
@@ -265,7 +265,10 @@ export default {
   background-color: #e9f1fa;
   font-weight: bold;
 }
-
+.detailes-header {
+  background-color: #B4BBC2;
+  font-weight: bold;
+}
 .cursor-pointer {
   cursor: pointer;
 }

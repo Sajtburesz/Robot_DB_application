@@ -24,13 +24,13 @@ urlpatterns = [
     path('teams/<int:teamId>/test-runs/<int:testrunpk>/comments/<int:pk>/', views.CommentRetrieveUpdateDestroyView.as_view(), name='comment-detail'),
 
     # Statistics
-    path('top-failing-testcases/<int:teamId>/', views.TopFailingTestCasesView.as_view(), name='top-failing-tcs'),
-    path('date-range/<int:teamId>/', views.DateRangeView.as_view(), name='date-range'),
-    path('treemap-data/<int:teamId>/', views.TreemapDataView.as_view(), name='treemap-data'),
-    path('timeline-data/<int:teamId>/', views.TimelineDataView.as_view(), name='timeline-data'),
-    path('duration-heatmap/<int:teamId>/', views.TestCaseDurationHeatmapData.as_view(), name='testcase-duration-heatmap-data'),
+    path('top-failing-testcases/<slug:teamId>/', views.TopFailingTestCasesView.as_view(), name='top-failing-tcs'),
+    path('date-range/<slug:teamId>/', views.DateRangeView.as_view(), name='date-range'),
+    path('treemap-data/<slug:teamId>/', views.TreemapDataView.as_view(), name='treemap-data'),
+    path('timeline-data/<slug:teamId>/', views.TimelineDataView.as_view(), name='timeline-data'),
+    path('duration-heatmap/<slug:teamId>/', views.TestCaseDurationHeatmapData.as_view(), name='testcase-duration-heatmap-data'),
 
     # Helper
-    path('suite-names/<int:teamId>/', views.SuiteNames.as_view(), name='suite-names'),
+    path('suite-names/<slug:teamId>/', views.SuiteNames.as_view(), name='suite-names'),
 
 ]
