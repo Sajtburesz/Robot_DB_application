@@ -7,7 +7,7 @@
             <!-- Team Selection -->
             <div class="col-md-12">
                 <label for="team-dropdown" class="form-label text-ucla-blue">Team:</label>
-                <div class="dropdown" ref="teamDropdown">
+                <div class="dropdown" ref="teamDropdown" id="teamDropdown">
                     <button class="btn btn-secondary dropdown-toggle w-100 bg-ucla-blue text-seasalt truncate" type="button"
                             id="team-dropdown" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleTeamDropdown()">
                         {{ selectedTeamName || 'Select a team' }}

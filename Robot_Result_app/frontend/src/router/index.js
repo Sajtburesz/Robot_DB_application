@@ -19,7 +19,7 @@ const routes = [
     component: () => import('../views/ListTeamsView.vue'),
   },
   {
-    path: '/teams/creat-team/',
+    path: '/teams/create-team/',
     name: 'CreateTeamView',
     component: () => import('../views/CreateTeamView.vue'),
   },
