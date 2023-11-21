@@ -1,5 +1,6 @@
 from rest_framework import permissions
-from teams.models import TeamMembership
+from teams.models import TeamMembership,Team
+from robot_test_management.models import TestRun
 from rest_framework.exceptions import PermissionDenied
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -16,25 +17,32 @@ class IsTeamOwnerByPropertyOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         
-        if request.method == 'DELETE':
-            return request.user.is_superuser or obj.owner == request.user or request.user.is_staff
-        
-
         if isinstance(obj, TeamMembership):
             team = obj.team
             membership = obj
-        else:
+        elif isinstance(obj,Team):
             team = obj
             try:
                 membership = TeamMembership.objects.get(user=request.user, team=team)
             except TeamMembership.DoesNotExist:
                 membership = None
+        elif isinstance(obj,TestRun):
+            team = Team.objects.get(id=obj.team_id)
+            try:
+                membership = TeamMembership.objects.get(user=request.user, team=team)
+            except TeamMembership.DoesNotExist:
+                membership = None
+        else:
+           return False
+        
+        if request.method == 'DELETE':
+            return request.user.is_superuser or team.owner == request.user or request.user.is_staff
 
         # Check if the user is a maintainer
-        is_maintainer = membership and membership.is_maintainer
+        maintainer = membership and membership.is_maintainer
         
         # Return True if the user is the owner, a maintainer, staff, or a superuser
-        return team.owner == request.user or is_maintainer or request.user.is_superuser or request.user.is_staff
+        return team.owner == request.user or maintainer or request.user.is_superuser or request.user.is_staff
 
     
 class IsTeamMember(permissions.BasePermission):

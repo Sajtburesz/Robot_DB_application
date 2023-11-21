@@ -1,0 +1,186 @@
+<robot generator="Robot Framework" generated="20231105T122151.216">
+  <suite id="s1" name="Example Suite 1" source="/path/to/test/cases/suite1">
+    <test id="t1" name="Test Case 1">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122211.216" />
+    </test>
+    <test id="t2" name="Test Case 2">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122206.216" />
+    </test>
+    <test id="t3" name="Test Case 3">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122205.216" />
+    </test>
+  </suite>
+  <suite id="s2" name="Example Suite 2" source="/path/to/test/cases/suite2">
+    <test id="t1" name="Test Case 1">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122155.216" />
+    </test>
+    <test id="t2" name="Test Case 2">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122245.216" />
+    </test>
+    <test id="t3" name="Test Case 3">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122221.216" />
+    </test>
+    <test id="t4" name="Test Case 4">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122201.216" />
+    </test>
+    <test id="t5" name="Test Case 5">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122221.216" />
+    </test>
+    <test id="t6" name="Test Case 6">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122222.216" />
+    </test>
+    <test id="t7" name="Test Case 7">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122219.216" />
+    </test>
+    <test id="t8" name="Test Case 8">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122229.216" />
+    </test>
+    <test id="t9" name="Test Case 9">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122221.216" />
+    </test>
+    <test id="t10" name="Test Case 10">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122208.216" />
+    </test>
+    <test id="t11" name="Test Case 11">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122237.216" />
+    </test>
+    <test id="t12" name="Test Case 12">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122201.216" />
+    </test>
+    <test id="t13" name="Test Case 13">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122202.216" />
+    </test>
+    <test id="t14" name="Test Case 14">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122218.216" />
+    </test>
+    <test id="t15" name="Test Case 15">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122225.216" />
+    </test>
+    <test id="t16" name="Test Case 16">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122157.216" />
+    </test>
+    <test id="t17" name="Test Case 17">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122225.216" />
+    </test>
+    <test id="t18" name="Test Case 18">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122242.216" />
+    </test>
+    <test id="t19" name="Test Case 19">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122153.216" />
+    </test>
+    <test id="t20" name="Test Case 20">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122243.216" />
+    </test>
+  </suite>
+  <suite id="s3" name="Example Suite 3" source="/path/to/test/cases/suite3">
+    <test id="t1" name="Test Case 1">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122155.216" />
+    </test>
+    <test id="t2" name="Test Case 2">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122247.216" />
+    </test>
+    <test id="t3" name="Test Case 3">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122218.216" />
+    </test>
+    <test id="t4" name="Test Case 4">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122247.216" />
+    </test>
+    <test id="t5" name="Test Case 5">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122203.216" />
+    </test>
+    <test id="t6" name="Test Case 6">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122223.216" />
+    </test>
+    <test id="t7" name="Test Case 7">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122212.216" />
+    </test>
+    <test id="t8" name="Test Case 8">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122234.216" />
+    </test>
+    <test id="t9" name="Test Case 9">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122227.216" />
+    </test>
+  </suite>
+  <suite id="s4" name="Example Suite 4" source="/path/to/test/cases/suite4">
+    <test id="t1" name="Test Case 1">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122224.216" />
+    </test>
+    <test id="t2" name="Test Case 2">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122220.216" />
+    </test>
+    <test id="t3" name="Test Case 3">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122219.216" />
+    </test>
+    <test id="t4" name="Test Case 4">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122204.216" />
+    </test>
+    <test id="t5" name="Test Case 5">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122158.216" />
+    </test>
+    <test id="t6" name="Test Case 6">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122238.216" />
+    </test>
+    <test id="t7" name="Test Case 7">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122243.216" />
+    </test>
+    <test id="t8" name="Test Case 8">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122239.216" />
+    </test>
+    <test id="t9" name="Test Case 9">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122223.216" />
+    </test>
+    <test id="t10" name="Test Case 10">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122227.216" />
+    </test>
+    <test id="t11" name="Test Case 11">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122153.216" />
+    </test>
+  </suite>
+  <suite id="s5" name="Example Suite 5" source="/path/to/test/cases/suite5">
+    <test id="t1" name="Test Case 1">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122246.216" />
+    </test>
+    <test id="t2" name="Test Case 2">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122251.216" />
+    </test>
+    <test id="t3" name="Test Case 3">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122242.216" />
+    </test>
+    <test id="t4" name="Test Case 4">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122219.216" />
+    </test>
+    <test id="t5" name="Test Case 5">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122204.216" />
+    </test>
+    <test id="t6" name="Test Case 6">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122155.216" />
+    </test>
+    <test id="t7" name="Test Case 7">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122248.216" />
+    </test>
+    <test id="t8" name="Test Case 8">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122207.216" />
+    </test>
+    <test id="t9" name="Test Case 9">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122246.216" />
+    </test>
+    <test id="t10" name="Test Case 10">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122206.216" />
+    </test>
+    <test id="t11" name="Test Case 11">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122230.216" />
+    </test>
+    <test id="t12" name="Test Case 12">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122220.216" />
+    </test>
+    <test id="t13" name="Test Case 13">
+      <status status="PASS" starttime="20231105T122151.216" endtime="20231105T122208.216" />
+    </test>
+    <test id="t14" name="Test Case 14">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122202.216" />
+    </test>
+    <test id="t15" name="Test Case 15">
+      <status status="FAIL" starttime="20231105T122151.216" endtime="20231105T122159.216" />
+    </test>
+  </suite>
+</robot>

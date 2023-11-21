@@ -50,7 +50,12 @@ export default {
                 this.$router.push('/manage-team/' + teamId + '/');
                 
             } catch (error) {
-                this.$toast.error(`Error creating team.`);
+                if (error.response.data.detail){
+                    this.$toast.error(`${error.response.data.detail}`);
+
+                }else{
+                    this.$toast.error(`Error creating team.`);
+                }
             }
         }
     }
