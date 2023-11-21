@@ -32,7 +32,7 @@
         <!-- Add Comment Section -->
         <div class="mt-4">
             <textarea class="form-control" v-model="newCommentText" placeholder="Write a comment..." rows="3" maxlength="200"></textarea>
-            <button class="btn btn-success btn-sm mt-2" @click="addComment">Post</button>
+            <button class="btn bg-ucla-blue clickable-item text-seasalt btn-sm mt-2" @click="addComment">Post</button>
         </div>
     </div>
 </template>
@@ -75,7 +75,7 @@ export default {
                 };
             }
             catch (error) {
-                console.error('Error loading comments:', error);
+                this.$toast.error(`Error loading comments.`);
             }
             finally {
                 this.loading = false;
@@ -87,7 +87,7 @@ export default {
                 return user.data.username;
             }
             catch (error) {
-                console.error('Error fetching current user:', error);
+                this.$toast.error(`Error fetching current user.`);
             }
         },
         isEditing(commentId) {
@@ -109,7 +109,7 @@ export default {
                 });
             }
             catch (error) {
-                console.error('Error saving comment:', error);
+                this.$toast.error(`Error saving comment.`);
             } finally{
                 this.editingCommentId = null;
                 this.loadComments();
@@ -121,7 +121,7 @@ export default {
                 await axios.delete(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/comments/${commentId}/`);
             }
             catch (error) {
-                console.error('Error deleting comment:', error);
+                this.$toast.error(`Error deleting comment.`);
             } finally{
                 this.loadComments();
             }
@@ -140,7 +140,7 @@ export default {
                 this.loadComments();
             }
             catch (error) {
-                console.error('Error adding comment:', error);
+                this.$toast.error(`Error adding comment.`);
             }
         },
         formatDate(dateString) {
@@ -172,7 +172,7 @@ export default {
                 };
             }
             catch (error) {
-                console.error('Error loading more comments:', error);
+                this.$toast.error(`Error loading more comments.`);
             }
             finally {
                 this.loading = false;

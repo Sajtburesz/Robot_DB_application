@@ -66,7 +66,7 @@
                           <input type="password" class="form-control" v-model="passwords.confirmPassword"
                             autocomplete="new-password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">Change Password</button>
+                        <button type="submit" class="btn bg-ucla-blue clickable-item text-seasalt" data-bs-dismiss="modal" aria-label="Close">Change Password</button>
                       </form>
                     </div>
                   </div>
@@ -114,7 +114,7 @@
                         <label class="form-label text-jet fw-bold">Description:</label>
                         <textarea class="form-control" v-model="editableUser.description"></textarea>
                       </div>
-                      <button type="submit" class="btn btn-primary me-2">Save</button>
+                      <button type="submit" class="btn bg-ucla-blue clickable-item text-seasalt me-2">Save</button>
                       <button @click="cancelEdit" class="btn btn-secondary bg-ucla-blue">Cancel</button>
                       <button class="btn btn-link hover-zoom-icon" data-bs-toggle="modal"
                         data-bs-target="#userDeleteModal">

@@ -205,36 +205,81 @@ class TopFailingTestCasesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, teamId):
-        failing_testcases = TestCase.objects.filter(
-            suite__test_run__team_id=teamId, status="FAIL"
-        ).values("name").annotate(
-            failure_count=Count('id')
-        ).order_by('-failure_count')[:5]
-        return Response(failing_testcases)
+
+        if teamId == "public":
+            failing_testcases = TestCase.objects.filter(
+                suite__test_run__is_public=True, status="FAIL"
+            ).values("name").annotate(
+                failure_count=Count('id')
+            ).order_by('-failure_count')[:5]
+
+            return Response(failing_testcases)
+        else:
+            try:
+                failing_testcases = TestCase.objects.filter(
+                    suite__test_run__team_id=teamId, status="FAIL"
+                ).values("name").annotate(
+                    failure_count=Count('id')
+                ).order_by('-failure_count')[:5]
+
+                return Response(failing_testcases)
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+            
+
 
 class DateRangeView(APIView):
     def get(self, request, teamId, format=None):
-        date_range = TestRun.objects.filter(team_id=teamId).aggregate(
-            min_date=Min('executed_at'),
-            max_date=Max('executed_at')
-        )
-        return Response(date_range, status=status.HTTP_200_OK)
+    
+        if teamId == "public":
+                date_range = TestRun.objects.filter(is_public=True).aggregate(
+                    min_date=Min('executed_at'),
+                    max_date=Max('executed_at')
+                )
+                
+                return Response(date_range, status=status.HTTP_200_OK)
+        else:
+            try:
+                date_range = TestRun.objects.filter(team_id=teamId).aggregate(
+                    min_date=Min('executed_at'),
+                    max_date=Max('executed_at')
+                )
+
+                return Response(date_range, status=status.HTTP_200_OK)
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+            
 
 class TreemapDataView(APIView):
     def get(self, request, teamId, format=None):
+           
         start_date = request.query_params.get('start_date')
-        suites_aggregated = TestCase.objects.filter(
-            suite__test_run__team_id=teamId
-        ).values(
-            'suite__name'
-        ).annotate(
-            total_cases=Count('name', distinct=True), 
-            failed_cases=Count('id', filter=Q(status='FAIL'))
-        )
+        if teamId == "public":
+                suites_aggregated = TestCase.objects.filter(
+                    suite__test_run__is_public=True
+                ).values(
+                    'suite__name'
+                ).annotate(
+                    total_cases=Count('name', distinct=True), 
+                    failed_cases=Count('id', filter=Q(status='FAIL'))
+                )
+        else:
+            try:
+                suites_aggregated = TestCase.objects.filter(
+                    suite__test_run__team_id=teamId
+                ).values(
+                    'suite__name'
+                ).annotate(
+                    total_cases=Count('name', distinct=True), 
+                    failed_cases=Count('id', filter=Q(status='FAIL'))
+                )
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+
         if start_date:
             suites_aggregated = suites_aggregated.filter(suite__test_run__executed_at__gte=start_date)
 
-        heatmap_data = [
+        treemap_data = [
             {
                 'suite_name': suite['suite__name'],
                 'total_cases': suite['total_cases'],
@@ -242,8 +287,7 @@ class TreemapDataView(APIView):
             }
             for suite in suites_aggregated
         ]
-        return Response(heatmap_data, status=status.HTTP_200_OK)
-
+        return Response(treemap_data, status=status.HTTP_200_OK)
 
 class TimelineDataView(APIView):
     def get(self, request, teamId, format=None):
@@ -251,14 +295,28 @@ class TimelineDataView(APIView):
         suite_filter = request.query_params.get('suite_filter', '')
 
         # Query to get the test cases and their failure periods
-        test_case_runs = TestCase.objects.filter(
-            suite__test_run__team_id=teamId,
-            suite__name__icontains=suite_filter,
-            status='FAIL'
-        ).order_by('name', 'suite__test_run__executed_at').values(
-            'name',
-            executed_at=F('suite__test_run__executed_at')
-        )
+        if teamId == "public":
+                test_case_runs = TestCase.objects.filter(
+                    suite__test_run__is_public=True,
+                    suite__name__icontains=suite_filter,
+                    status='FAIL'
+                ).order_by('name', 'suite__test_run__executed_at').values(
+                    'name',
+                    executed_at=F('suite__test_run__executed_at')
+                )
+        else:
+            try:
+                test_case_runs = TestCase.objects.filter(
+                    suite__test_run__team_id=teamId,
+                    suite__name__icontains=suite_filter,
+                    status='FAIL'
+                ).order_by('name', 'suite__test_run__executed_at').values(
+                    'name',
+                    executed_at=F('suite__test_run__executed_at')
+                )
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+
 
         if start_date:
             test_case_runs = test_case_runs.filter(suite__test_run__executed_at__gte=start_date)
@@ -317,12 +375,24 @@ class TestCaseDurationHeatmapData(APIView):
             first_day_of_next_month = datetime(year, month + 1, 1)
         
         # Filter test cases by the provided team pk, suite name, and date range
-        test_cases = TestCase.objects.filter(
-            suite__name=suite_name,
-            suite__test_run__team__pk=teamId,
-            suite__test_run__executed_at__gte=first_day_of_month,
-            suite__test_run__executed_at__lt=first_day_of_next_month
-        )
+        if teamId == "public":
+            test_cases = TestCase.objects.filter(
+                suite__name=suite_name,
+                suite__test_run__is_public=True,
+                suite__test_run__executed_at__gte=first_day_of_month,
+                suite__test_run__executed_at__lt=first_day_of_next_month
+            )
+        else:
+            try:
+                test_cases = TestCase.objects.filter(
+                    suite__name=suite_name,
+                    suite__test_run__team__pk=teamId,
+                    suite__test_run__executed_at__gte=first_day_of_month,
+                    suite__test_run__executed_at__lt=first_day_of_next_month
+                )
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+
         
         # Get the list of unique testcases in the suite
         testcase_names = test_cases.values_list('name', flat=True).distinct()
@@ -357,4 +427,10 @@ class TestCaseDurationHeatmapData(APIView):
 # Helper 
 class SuiteNames(APIView):
     def get(self, request, teamId):
-        return Response(TestSuite.objects.filter(test_run__team_id=teamId).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)
+        if teamId == 'public':
+            return Response(TestSuite.objects.filter(test_run__is_public=True).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)
+        else:
+            try:
+                return Response(TestSuite.objects.filter(test_run__team_id=teamId).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)
+            except ValueError:
+                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)   

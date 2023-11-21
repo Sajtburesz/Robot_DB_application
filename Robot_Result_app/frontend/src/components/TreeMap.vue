@@ -29,8 +29,11 @@
         </div>
 
         <div class="row">
-            <div class="col">
-                <apexchart v-if="loaded" type="treemap" :options="chartOptions" :series="series"></apexchart>
+            <div class="col d-flex flex-column">
+                <apexchart v-if="loaded && this.series[0].data.length" type="treemap" :options="chartOptions" :series="series"></apexchart>
+                <div v-else class="no-data-message">
+                    No data available with these parameters.
+                </div>
             </div>
         </div>
     </div>
@@ -89,23 +92,27 @@ export default {
                     url = response.data.next;
                 }
                 this.teams = allTeams;
-                this.filteredTeams = allTeams;
+                
+                this.teams.unshift({id: 'public', name: 'public'});
+
+                this.filteredTeams = this.teams;
                 this.selectedTeam = this.teams[0]?.id;
                 this.selectedTeamName = this.teams[0]?.name;
             } catch (error) {
-                console.error("Error fetching user teams:", error);
+                this.$toast.error(`Error fetching user teams.`);
             }
         },
         async fetchDateRange() {
             try {
                 const response = await axios.get(`/api/v1/date-range/${this.selectedTeam}/`);
-                this.minDate = response.data.min_date.split('T')[0];
-                this.maxDate = response.data.max_date.split('T')[0];
-                this.startDate = this.minDate; // Set the start date to the oldest date
-                console.log(this.minDate)
-                this.fetchTreemapData(); // Fetch heatmap data for the initial date
+                if (response.data.min_date && response.data.max_date){
+                    this.minDate = response.data.min_date.split('T')[0];
+                    this.maxDate = response.data.max_date.split('T')[0];
+                    this.startDate = this.minDate; // Set the start date to the oldest date
+                }
+                this.fetchTreemapData();
             } catch (error) {
-                console.error("Error fetching heatmap date range:", error);
+                this.$toast.error(`Error fetching treemap date range.`);
             }
         },
         async fetchTreemapData() {
@@ -127,7 +134,7 @@ export default {
 
                     this.loaded = true;
                 } catch (error) {
-                    console.error("Error fetching heatmap data:", error);
+                    this.$toast.error(`Error fetching treemap data.`);
                 }
             }
         },
@@ -167,3 +174,15 @@ export default {
     }
 };
 </script>
+
+<style>
+    .no-data-message {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Align to the top */
+        width: 100%;
+        text-align: center;
+        color: #666;
+        font-size: 1.2em;
+    }
+</style>

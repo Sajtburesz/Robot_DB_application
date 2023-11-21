@@ -27,7 +27,7 @@
         Selected for compare ({{ selectedTestRuns.length}}/2): {{ selectedTestRuns.map(testRun => testRun.id).join(', ') }}
       </span>
       <div>
-        <button v-if="selectedTestRuns.length === 2" class="btn btn-primary btn-sm" @click="compareTestRuns">Compare</button>
+        <button v-if="selectedTestRuns.length === 2" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm" @click="compareTestRuns">Compare</button>
         <font-awesome-icon v-if="selectedTestRuns.length > 0"  class="btn btn-link hover-zoom-icon" @click="deleteSelectedTestruns()" icon="fa-solid fa-xmark" />
       </div>
     </div>
@@ -122,7 +122,7 @@ export default {
       
         await this.fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/`);
       } catch (error) {
-        console.error("Error during fetching teams:", error);
+        this.$toast.error(`Error fetching teams.`);
       }
     },
     async fetchTestRuns(url) {
@@ -131,9 +131,9 @@ export default {
         this.testRuns = response.data.results.map(tr => ({ ...tr, showAllAttributes: false }));
         this.nextPageUrl = response.data.next;
         this.previousPageUrl = response.data.previous;
-        console.log(response.data.results);
+        
       } catch (error) {
-        console.error("Error during fetching test runs:", error);
+        this.$toast.error(`Error during fetching test runs.`);
       }
     },
     handleQueryChange() {

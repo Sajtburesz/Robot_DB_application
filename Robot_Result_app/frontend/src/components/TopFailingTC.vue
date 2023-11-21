@@ -26,7 +26,10 @@
 
         <div class="row">
             <div class="col">
-                <apexchart v-if="loaded" type="bar" :options="chartOptions" :series="series"></apexchart>
+                <apexchart v-if="loaded && this.series[0].data.length" type="bar" :options="chartOptions" :series="series"></apexchart>
+                <div v-else class="no-data-message">
+                    No data available with these parameters.
+                </div>
             </div>
         </div>
     </div>
@@ -57,12 +60,9 @@ export default {
                     rotate: -45,
                     rotateAlways: true,
                     minHeight: 100,
-                    formatter: (val) => {
-                        return val.length > 10 ? val.substring(0, 10) + '...' : val;
-                    }
                 },
                 tooltip: {
-                    enabled: false // Disable tooltip if labels are too long
+                    enabled: true // Disable tooltip if labels are too long
                 }
                 },
                 yaxis: {
@@ -103,6 +103,13 @@ export default {
         await this.fetchTeams();
         await this.fetchFailingTestcases();
     },
+    watch: {
+        selectedTeam(newTeam, oldTeam) {
+            if (newTeam !== oldTeam) {
+                this.fetchFailingTestcases();
+            }
+        }
+    },
     methods: {
         async fetchTeams() {
             try {
@@ -115,11 +122,14 @@ export default {
                     url = response.data.next;
                 }
                 this.teams = allTeams;
-                this.filteredTeams = allTeams;
+
+                this.teams.unshift({id: 'public', name: 'public'});
+
+                this.filteredTeams = this.teams;
                 this.selectedTeam = this.teams[0]?.id;
                 this.selectedTeamName = this.teams[0]?.name;
             } catch (error) {
-                console.error("Error fetching user teams:", error);
+                this.$toast.error(`Error fetching user teams.`);
             }
         },
         async fetchFailingTestcases() {
@@ -127,12 +137,16 @@ export default {
                 try {
                     const response = await axios.get(`/api/v1/top-failing-testcases/${this.selectedTeam}/`);
                     this.series[0].data = response.data.map(item => item.failure_count);
-                    this.chartOptions.xaxis.categories = [];
-                    this.chartOptions.xaxis.categories = response.data.map(item => item.name);
-                    console.log(this.chartOptions.xaxis.categories);
+                    this.chartOptions = {
+                        ...this.chartOptions,
+                        xaxis: {
+                            ...this.chartOptions.xaxis,
+                            categories: response.data.map(item => item.name)
+                        }
+                    };
                     this.loaded = true;
                 } catch (error) {
-                    console.error("Error fetching failing test cases:", error);
+                    this.$toast.error(`Error fetching failing test cases.`);
                 }
             }
         },

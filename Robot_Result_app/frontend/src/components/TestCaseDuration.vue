@@ -24,7 +24,7 @@
             </div>
             <div class="col-md-3">
                 <label for="date" class="form-label text-ucla-blue">Date:</label>
-                <input id="date" type="month" class="form-control bg-seasalt text-jet" v-model="date"
+                <input id="date" type="month" placeholder="YYYY.MM" class="form-control bg-seasalt text-jet" v-model="date"
                     @change="selectedSuite ? fetchData() : null">
             </div>
             <div class="col-md-6" v-if="selectedTeam">
@@ -52,10 +52,10 @@
 
         <div class="row">
             <div class="col">
-                <div v-if="!chartSeries.length" class="chart-placeholder">
-                    Loading chart...
+                <apexchart v-if="this.chartSeries.length" type="heatmap" :options="chartOptions" :series="chartSeries"></apexchart>
+                <div v-else class="no-data-message">
+                    No data available with these parameters.
                 </div>
-                <apexchart v-else type="heatmap" :options="chartOptions" :series="chartSeries"></apexchart>
             </div>
         </div>
     </div>
@@ -191,7 +191,7 @@ export default {
                     this.processData(response.data);
                 })
                 .catch((error) => {
-                    console.error('Error fetching data:', error);
+                    this.$toast.error(`Error fetching data: ${error.request.statusText}`);
                 });
         },
         async fetchDateRange() {
@@ -202,7 +202,8 @@ export default {
                 this.date = this.maxDate;
                 await this.fetchSuites(); 
             } catch (error) {
-                console.error("Error fetching heatmap date range:", error);
+                this.chartSeries = [];
+                this.$toast.error(`Error fetching heatmap date range.`);
             }
         },
         async fetchTeams() {
@@ -216,11 +217,14 @@ export default {
                     url = response.data.next;
                 }
                 this.teams = allTeams;
-                this.filteredTeams = allTeams;
+
+                this.teams.unshift({id: 'public', name: 'public'});
+
+                this.filteredTeams = this.teams;
                 this.selectedTeam = this.teams[0]?.id;
                 this.selectedTeamName = this.teams[0]?.name;
             } catch (error) {
-                console.error("Error fetching user teams:", error);
+                this.$toast.error(`Error fetching user teams.`);
             }
         },
         async fetchSuites() {
@@ -232,7 +236,7 @@ export default {
                 this.filteredSuites = this.suites;
                 this.selectSuite(this.filteredSuites[0]);
             } catch (error) {
-                console.error("Error fetching suite names:", error);
+                this.$toast.error(`Error fetching suite names.`);
             }
         },
         filterSuites() {

@@ -26,13 +26,13 @@
                                     <font-awesome-icon icon="fa-solid fa-trash" style="color: red;" />
                                 </button>
                             </div>
-                            <!-- Plus Button in the Middle -->
-                            <div v-if="index === attributes.length - 1" class="position-absolute"
-                                style="left: 45%; transform: translateX(-50%);">
-                                <button type="button" class="btn btn-link hover-zoom-icon" @click="addAttribute()">
-                                    <font-awesome-icon icon="fa-solid fa-circle-plus" />
-                                </button>
-                            </div>
+                        </div>
+                        <!-- Plus Button in the Middle -->
+                        <div class="position-absolute"
+                            style="left: 39%; transform: translateX(-50%);">
+                            <button type="button" class="btn btn-link hover-zoom-icon" @click="addAttribute()">
+                               <font-awesome-icon icon="fa-solid fa-circle-plus" />
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -77,11 +77,12 @@ export default {
             deleteIndex: null
         };
     },
-    mounted() {
+    async mounted() {
+        await this.fetchAttributes();
         this.deleteIndex = null;
-    },
-    created() {
-        this.fetchAttributes();
+        if (this.attributes.length === 0){
+            this.addAttribute();
+        }
     },
     methods: {
         async fetchAttributes() {
