@@ -68,11 +68,20 @@ Upload Test Run
     Element Should Contain    //div[contains(text(),'Upload Successfull')]    Upload Successfull
 
 Edit Test Run To Public
-    Go To    ${TEST_RUN_URL}
-    Click Element  edit_test_run_button
-    Select Checkbox  public_checkbox
-    Click Button  save_button
-    Wait Until Element Is Visible  edit_success_message
+    Go To  ${TEST_RUN_URL}
+    
+    Select From List By Value  id=teamSelect  RobotFrameworkTestTeam
+    Wait Until Element Is Visible  css:.card
+    Click Element  css:.card:first-child
+
+    # Click Element  edit_test_run_button
+    # Select Checkbox  public_checkbox
+    # Click Button  save_button
+    # Wait Until Element Is Visible  edit_success_message
+
+Select From List By Value
+    [Arguments]    ${locator}  ${value}
+    Select From List by Value    ${locator}    ${value}
 
 # Delete Team
 #     Go To  ${HOME_URL}/teams

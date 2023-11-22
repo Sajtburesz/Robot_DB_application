@@ -222,7 +222,9 @@ export default {
         this.suites = this.testRun.suites.suites;
         this.nextSuitesUrl = this.testRun.suites.next;
         this.prevSuitesUrl = this.testRun.suites.previous;
-        this.fetchRole();
+        if (this.teamId !== 'public'){
+          this.fetchRole();
+        }
       } catch (error) {
         this.$toast.error(`Error fetching test run.`);
       }
