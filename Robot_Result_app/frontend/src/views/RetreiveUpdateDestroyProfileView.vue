@@ -11,13 +11,18 @@
 
                 <!-- User's Current Avatar -->
                 <img v-if="user.avatar" :src="`/static/avatars/${user.avatar}`" alt="Avatar"
-                  class="img-fluid rounded-circle my-5 hover-zoom-icon" style="width: 80px; cursor: pointer;"
+                  class="img-fluid rounded-circle my-3 hover-zoom-icon" style="width: 80px; cursor: pointer;"
                   data-bs-toggle="modal" data-bs-target="#avatarModal" loading="lazy" />
                 <h5><b>{{ user.username }}</b></h5>
                 <br>
-                <button class="btn btn-light mb-2" v-if="!editMode" @click="startEdit">Edit Profile</button>
-                <button class="btn btn-light mb-5" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change
+                <button class="btn bg-french-grey clickable-item text-jet mb-2" v-if="!editMode" @click="startEdit">Edit
+                  Profile</button>
+                <button class="btn bg-french-grey clickable-item text-jet mb-2" data-bs-toggle="modal"
+                  data-bs-target="#changePasswordModal">Change
                   Password</button>
+                <button class="btn bg-french-grey clickable-item text-jet mb-5" data-bs-toggle="modal"
+                  data-bs-target="#getApiTokenModal">My
+                  API Token</button>
               </div>
 
               <!-- Avatar Selection Modal -->
@@ -50,7 +55,8 @@
                     </div>
                     <div class="modal-body">
                       <form @submit.prevent="changePassword">
-                        <input type="text" name="username" :value="user.username" class="form-control" autocomplete="username" hidden readonly>
+                        <input type="text" name="username" :value="user.username" class="form-control"
+                          autocomplete="username" hidden readonly>
                         <div class="mb-3">
                           <label class="form-label">Old Password:</label>
                           <input type="password" class="form-control" v-model="passwords.oldPassword"
@@ -66,8 +72,32 @@
                           <input type="password" class="form-control" v-model="passwords.confirmPassword"
                             autocomplete="new-password" required>
                         </div>
-                        <button type="submit" class="btn bg-ucla-blue clickable-item text-seasalt" data-bs-dismiss="modal" aria-label="Close">Change Password</button>
+                        <button type="submit" class="btn bg-ucla-blue clickable-item text-seasalt" data-bs-dismiss="modal"
+                          aria-label="Close">Change Password</button>
                       </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- API Token Modal -->
+              <div class="modal fade" id="getApiTokenModal" tabindex="-1" aria-labelledby="getApiTokenModal"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="getApiTokenModalLabel">Get API Token</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" name="username" :value="user.username" class="form-control"
+                          autocomplete="username" hidden readonly>
+                        <div class="mb-3">
+                          <label class="form-label">Password:</label>
+                          <input type="password" class="form-control"
+                            autocomplete="password" v-model="passwords.oldPassword" required>
+                        </div>
+                        <button class="btn bg-ucla-blue clickable-item text-seasalt" data-bs-dismiss="modal"
+                          aria-label="Close" @click="fetchApiToken(passwords.oldPassword)">Fetch My API Token</button>
                     </div>
                   </div>
                 </div>
@@ -181,6 +211,15 @@ export default {
     startEdit() {
       this.editMode = true;
     },
+    async fetchApiToken(pass) {
+      try {
+        const username = await axios.get("/auth/users/me/");
+        const token = await axios.post("/auth/token/login/", { username: username.data.username, password: pass });
+        this.$toast.info(`API Token: ${token.data.auth_token}`, { dismissible: false, duration: 10000 });
+      } catch (error) {
+        this.$toast.error(`Unable to authenticate user.`);
+      }
+    },
     async fetchUserData() {
       try {
         const username = await axios.get("/auth/users/me/");
@@ -252,6 +291,16 @@ export default {
 </script>
 
 <style scoped>
+.clickable-item {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.clickable-item:hover {
+  background-color: #333333ff;
+  color: #f7f7f7ff;
+}
+
 .hover-zoom-icon {
   transition: transform 0.3s ease;
 }
@@ -264,5 +313,4 @@ export default {
   width: 60px;
   cursor: pointer;
   transition: transform 0.3s ease;
-}
-</style>
+}</style>
