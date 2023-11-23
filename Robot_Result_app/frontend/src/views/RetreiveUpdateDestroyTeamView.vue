@@ -177,7 +177,7 @@ export default {
             }
         });
         
-        const username = this.currentUser();
+        const username = await this.currentUser();
     
         if (response.data.owner === username) {
             this.owner = true;
@@ -225,7 +225,7 @@ export default {
                 });
                 this.maintainer = memberData.data.is_maintainer;
             }
-            // TODO: ERROR Handling
+
         },
         containsUsername(usernameToCheck) {
             return Object.values(this.members).some(member => member.username === usernameToCheck);
@@ -293,12 +293,11 @@ export default {
             this.$router.push("/");
         }
     }
-    // TODO: Handle response codes with a popup warning and make sure saved elements don't change
+
 };
 </script>
   
 <style>
-/* Styles for the modal (simple example) */
 .modal {
     display: block;
     position: fixed;
