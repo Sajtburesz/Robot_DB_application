@@ -32,7 +32,8 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = ['http://*']
 
 NGINX_PORT=os.environ.get('NGINX_PORT', '8000')
-CSRF_TRUSTED_ORIGINS = [f'http://127.0.0.1:{NGINX_PORT}',f'http://localhost:{NGINX_PORT}']
+NGINX_HOST=os.environ.get('NGINX_HOST', 'localhost')
+CSRF_TRUSTED_ORIGINS = [f'http://127.0.0.1:{NGINX_PORT}',f'http://{NGINX_HOST}:{NGINX_PORT}']
 
 
 # Application definition
