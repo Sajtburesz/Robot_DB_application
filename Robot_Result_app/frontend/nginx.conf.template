@@ -1,7 +1,7 @@
 server {
     listen 80;
     server_name ${NGINX_HOST};  # Automatically Replace with your domain
-
+    client_max_body_size 500M;
     # Location for Vue.js build artifacts
     location / {
         root /usr/share/nginx/html;
