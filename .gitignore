@@ -1,6 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django,python,vue,vuejs
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,python,vue,vuejs
-
+.vscode/
 ### Django ###
 *.log
 *.pot
