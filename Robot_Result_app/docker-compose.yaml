@@ -32,7 +32,7 @@ services:
      - DB_NAME=robot_db # Postgres DB name
      - DB_USER=django_backend # Postgres DB user
      - DB_PASSWORD=super_secret_password  # Postgres DB password
-     - PORT=5432 # DB PORT 
+     - DB_PORT=5432 # DB PORT 
      - NGINX_PORT=8080 # NGINX port is the same where nginx is exposed, this is needed so frontend is whitelisted to make http requests to backend 
      - NGINX_HOST=localhost # NGINX Host, same as the one at NGINX HOST
      - ADMIN_USERNAME=admin # Initail superuser username
