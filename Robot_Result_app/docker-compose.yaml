@@ -34,6 +34,8 @@ services:
      - DB_PASSWORD=super_secret_password  # Postgres DB password
      - PORT=5432 # DB PORT 
      - NGINX_PORT=8080 # NGINX port is the same where nginx is exposed, this is needed so frontend is whitelisted to make http requests to backend 
+     - ADMIN_USERNAME=admin # Initail superuser username
+     - ADMIN_PASSWORD=admin # Password for superuser
     depends_on:
       db:
         condition: service_healthy
