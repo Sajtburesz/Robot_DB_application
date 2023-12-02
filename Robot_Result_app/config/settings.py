@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,10 +26,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-g-1(sg$k89kwwxpkwdb0h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS', '*')]
+# For better security set them to a narrowed list of domains, ips
+ALLOWED_HOSTS = ['*']
 
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:8080', 'http://localhost:8080']
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8080', 'http://localhost:8080']
+CORS_ALLOWED_ORIGINS = ['http://*']
+
+NGINX_PORT=os.environ.get('NGINX_PORT', '8000')
+CSRF_TRUSTED_ORIGINS = [f'http://127.0.0.1:{NGINX_PORT}',f'http://localhost:{NGINX_PORT}']
+
 
 # Application definition
 

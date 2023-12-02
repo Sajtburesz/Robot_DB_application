@@ -1,6 +1,11 @@
 #!/bin/bash
 
 # Start PostgreSQL server in the background
+if [ -d /db_base/base.sql ]; then
+    echo "/db_base/base.sql is a directory, expected a file. Creating a new file."
+    rm -rf /db_base/base.sql
+    touch /db_base/base.sql
+fi
 echo "Starting PostgreSQL server..."
 docker-entrypoint.sh postgres &
 

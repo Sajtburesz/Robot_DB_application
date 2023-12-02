@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name localhost;  # Replace with your domain
+    server_name ${NGINX_HOST};  # Automatically Replace with your domain
 
     # Location for Vue.js build artifacts
     location / {
@@ -16,33 +16,33 @@ server {
 
     # Proxying requests to your Django backend (Gunicorn)
     location /api/ {
-        proxy_pass http://backend:8000;
+        proxy_pass http://backend:${BACKEND_PORT};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
     location /accounts/ {
-        proxy_pass http://backend:8000;
+        proxy_pass http://backend:${BACKEND_PORT};
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
     }
 
     location /auth/ {
-        proxy_pass http://backend:8000;
+        proxy_pass http://backend:${BACKEND_PORT};
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
     }
     location /api-auth/ {
-        proxy_pass http://backend:8000;
+        proxy_pass http://backend:${BACKEND_PORT};
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
     }
     location /admin/ {
-        proxy_pass http://backend:8000;
+        proxy_pass http://backend:${BACKEND_PORT};
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
