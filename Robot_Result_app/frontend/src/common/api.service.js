@@ -1,6 +1,8 @@
-const axios = require("axios");
+const axios = require('axios');
 
-axios.defaults.xsrfCookieName = "csrftoken";
-axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+function configureAxios() {
+  axios.defaults.xsrfCookieName = "csrftoken";
+  axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+}
 
-export { axios };
+export { axios, configureAxios };

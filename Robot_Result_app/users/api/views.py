@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError
 from rest_framework import generics, status, views
@@ -203,3 +203,13 @@ class ChangePasswordView(views.APIView):
         user.set_password(new_password)
         user.save()
         return Response({"status": "success"}, status=status.HTTP_200_OK)
+    
+
+class CheckSessionView(views.APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, format=None):
+        if request.user.is_authenticated:
+            return Response({'isAuthenticated': True})
+        else:
+            return Response({'isAuthenticated': False})

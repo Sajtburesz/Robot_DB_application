@@ -5,7 +5,8 @@ from users.api.views import (AvatarSelectionView,
                              UserListView,
                              UserTeamsListView,
                              GetAdminStatusView,
-                             ChangePasswordView)
+                             ChangePasswordView,
+                             CheckSessionView)
 
 
 urlpatterns = [
@@ -15,4 +16,5 @@ urlpatterns = [
     path("avatar/change/", AvatarSelectionView.as_view(), name="avatar"),
     path("check-admin-status/", GetAdminStatusView.as_view(), name="admin-status"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path('check-session/', CheckSessionView.as_view(), name='check-session'),
 ]

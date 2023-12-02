@@ -10,7 +10,7 @@ from django.db.models import (Count,
 from django.db.models.functions import TruncDay
 
 
-from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin
+from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin,IsTeamOwnerByPropertyOrReadOnly
 
 from robot_test_management.models import (TestCase,
                                           TestRun,
@@ -72,8 +72,7 @@ class TestRunListView(generics.ListAPIView):
 
 class TestRunRetreiveView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TestRunDetailSerializer
-    permission_classes = [IsAuthenticated,IsTeamMemberOfRelatedTeam]
-    # TODO: Maybe add filtering option to nested suites?
+    permission_classes = [IsAuthenticated,IsTeamMemberOfRelatedTeam,IsTeamOwnerByPropertyOrReadOnly]
 
     def get_queryset(self):
         team_id = self.kwargs.get('teamId')
@@ -83,7 +82,6 @@ class TestRunRetreiveView(generics.RetrieveUpdateDestroyAPIView):
 class TestRunRetreivePublicView(generics.RetrieveAPIView):
     serializer_class = TestRunDetailSerializer
     permission_classes = [IsAuthenticated]
-    # TODO: Maybe add filtering option to nested suites?
 
     def get_queryset(self):
         return TestRun.objects.filter(is_public = True)

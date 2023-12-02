@@ -14,7 +14,7 @@
                             <label for="teamName" class="form-label fw-bold">Team Name</label>
                             <input type="text" class="form-control" id="teamName" v-model="teamName" required>
                         </div>
-                        <button type="submit" class="btn btn-ucla-blue fw-bold">Create</button>
+                        <button type="submit" class="btn bg-ucla-blue clickable-item text-seasalt fw-bold">Create</button>
                     </form>
                 </div>
             </div>
@@ -50,7 +50,12 @@ export default {
                 this.$router.push('/manage-team/' + teamId + '/');
                 
             } catch (error) {
-                this.$toast.error(`Error creating team.`);
+                if (error.response.data.detail){
+                    this.$toast.error(`${error.response.data.detail}`);
+
+                }else{
+                    this.$toast.error(`Error creating team.`);
+                }
             }
         }
     }

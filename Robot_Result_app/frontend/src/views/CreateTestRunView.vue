@@ -7,14 +7,14 @@
             <!-- Team Selection -->
             <div class="col-md-12">
                 <label for="team-dropdown" class="form-label text-ucla-blue">Team:</label>
-                <div class="dropdown" ref="teamDropdown">
+                <div class="dropdown" ref="teamDropdown" id="teamDropdown">
                     <button class="btn btn-secondary dropdown-toggle w-100 bg-ucla-blue text-seasalt truncate" type="button"
                             id="team-dropdown" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleTeamDropdown()">
                         {{ selectedTeamName || 'Select a team' }}
                     </button>
                     <div class="dropdown-menu w-100" aria-labelledby="team-dropdown">
                         <div class="p-2">
-                            <input type="text" class="form-control mb-2 bg-seasalt text-jet" v-model="teamFilter"
+                            <input type="text" id="filter" class="form-control mb-2 bg-seasalt text-jet" v-model="teamFilter"
                                 placeholder="Type to filter..." @input="filterTeams()">
                         </div>
                         <ul class="list-group overflow-auto" style="max-height: 200px;">

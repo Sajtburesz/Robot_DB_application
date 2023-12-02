@@ -19,10 +19,13 @@
             <div class="d-flex justify-content-between align-items-center">
               <span><strong>Executed At:</strong> {{ new Date(testRun.executed_at).toLocaleString() }}</span>
               <div>
-                <button v-if="isPublic" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm me-2" @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit'
-                }}</button>
-                <button v-if="editMode && isPublic" class="btn btn-secondary btn-sm me-2" @click="cancelEdit">Cancel</button>
-                <button v-if="isPublic" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#testRunDeleteModal">
+                <button v-if="isPublic && (this.role !== 'Member' || isAdmin)" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm me-2"
+                  @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit'
+                  }}</button>
+                <button v-if="editMode && isPublic && (this.role !== 'Member' || isAdmin)" class="btn btn-secondary btn-sm me-2"
+                  @click="cancelEdit">Cancel</button>
+                <button v-if="isPublic && (this.role !== 'Member' || isAdmin)" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                  data-bs-target="#testRunDeleteModal">
                   <font-awesome-icon icon="fa-solid fa-trash" />
                 </button>
               </div>
@@ -145,7 +148,7 @@ export default {
       currentSuiteDetails: {},
       expandedTestCases: [],
       currentTestCaseDetails: {},
-
+      role: null,
       showTestRunDetails: false,
       editMode: false,
       showDeleteConfirmation: false,
@@ -160,7 +163,11 @@ export default {
   computed: {
     isPublic() {
       return this.teamId !== 'public';
-    }
+    },
+    isAdmin() {
+      this.$store.dispatch('fetchAdminStatus');
+      return this.$store.state.isAdmin;
+    },
   },
   methods: {
     toggleEditMode() {
@@ -170,6 +177,23 @@ export default {
         this.originalTestRun = JSON.parse(JSON.stringify(this.testRun)); // Copy original data
       }
       this.editMode = !this.editMode;
+    },
+    async fetchRole() {
+      try {
+        const response = await axios.get("/api/v1/teams/" + this.teamId + "/");
+        const username = await axios.get("/auth/users/me/");
+
+        const foundMember = response.data.members.find(member => member.username === username.data.username);
+
+        if (response.data.owner === username.data.username) {
+          this.role = 'owner';
+        } else {
+          this.role = foundMember.role;
+        }
+      } catch (error) {
+        this.$toast.error('Error fetching user role.');
+      }
+
     },
     cancelEdit() {
       this.testRun = JSON.parse(JSON.stringify(this.originalTestRun)); // Revert changes
@@ -198,6 +222,9 @@ export default {
         this.suites = this.testRun.suites.suites;
         this.nextSuitesUrl = this.testRun.suites.next;
         this.prevSuitesUrl = this.testRun.suites.previous;
+        if (this.teamId !== 'public'){
+          this.fetchRole();
+        }
       } catch (error) {
         this.$toast.error(`Error fetching test run.`);
       }
@@ -265,10 +292,12 @@ export default {
   background-color: #e9f1fa;
   font-weight: bold;
 }
+
 .detailes-header {
   background-color: #B4BBC2;
   font-weight: bold;
 }
+
 .cursor-pointer {
   cursor: pointer;
 }

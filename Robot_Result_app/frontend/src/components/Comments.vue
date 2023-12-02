@@ -32,7 +32,7 @@
         <!-- Add Comment Section -->
         <div class="mt-4">
             <textarea class="form-control" v-model="newCommentText" placeholder="Write a comment..." rows="3" maxlength="200"></textarea>
-            <button class="btn bg-ucla-blue clickable-item text-seasalt btn-sm mt-2" @click="addComment">Post</button>
+            <button class="btn bg-ucla-blue clickable-item text-seasalt btn-sm mt-2" id="post-comment" @click="addComment">Post</button>
         </div>
     </div>
 </template>

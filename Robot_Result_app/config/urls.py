@@ -43,7 +43,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
-    # TODO: Only include usrs/set_password!!
+    
     path("auth/", include("djoser.urls.authtoken")),
     
     path('auth/users/me/', GetSelfUsernameView.as_view(), name='logged-in-user-username'),
