@@ -12,7 +12,7 @@ from django.db import transaction
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from core.pagination import PageNumberPaginationNoCount
-
+from django.conf import settings
 
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,9 +20,8 @@ class AttributeSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def validate(self, data):
-        MAX_INSTANCE_COUNT = 6  # Define your maximum limit here
-        if Attributes.objects.count() >= MAX_INSTANCE_COUNT:
-            raise serializers.ValidationError(f"Maximum allowed instances ({MAX_INSTANCE_COUNT}) of Attributes have been reached.")
+        if Attributes.objects.count() >= settings.MAX_ATTRIBUTE_INSTANCE_COUNT:
+            raise serializers.ValidationError(f"Maximum allowed instances ({settings.MAX_ATTRIBUTE_INSTANCE_COUNT}) of Attributes have been reached.")
         return data
 
 # Creation of TestRun instance START
@@ -59,13 +58,10 @@ class TestRunSerializer(serializers.ModelSerializer):
         file_obj = validated_data.pop('output_file')
         
         if isinstance(file_obj, InMemoryUploadedFile):
-            # Read the file content directly
             parsed_data, executed_at = parse_robot_output(file_obj)
         else:
-            # Use the temporary file path for larger files
             parsed_data, executed_at = parse_robot_output(file_obj.temporary_file_path())
 
-        # Start the transaction block
         with transaction.atomic():
             test_run = TestRun.objects.create(**validated_data, executed_at=executed_at)
 
@@ -77,7 +73,6 @@ class TestRunSerializer(serializers.ModelSerializer):
                 suite_instance = TestSuite(test_run=test_run, **suite_data)
                 suites_to_create.append((suite_instance, tests_data))
 
-            # Bulk create suites
             created_suites = TestSuite.objects.bulk_create([suite[0] for suite in suites_to_create])
 
             test_cases_to_create = []
@@ -87,7 +82,6 @@ class TestRunSerializer(serializers.ModelSerializer):
                     test_case_instance = TestCase(suite=created_suites[idx], **test_data)
                     test_cases_to_create.append((test_case_instance, keywords_data))
 
-            # Bulk create test cases
             created_test_cases = TestCase.objects.bulk_create([test_case[0] for test_case in test_cases_to_create])
 
             keywords_to_create = []
@@ -96,7 +90,6 @@ class TestRunSerializer(serializers.ModelSerializer):
                     keyword_instance = Keyword(test_case=created_test_cases[idx], **keyword_data)
                     keywords_to_create.append(keyword_instance)
 
-            # Bulk create keywords
             Keyword.objects.bulk_create(keywords_to_create)
 
         return test_run

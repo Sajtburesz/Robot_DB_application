@@ -104,9 +104,9 @@ if os.environ.get('TESTING') != 'True':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'robot_db'),
-            'USER': os.environ.get('DB_USER', 'django_backend'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'super_secret_password'),
+            'NAME': os.environ.get('POSTGRES_DB', 'robot_db'),
+            'USER': os.environ.get('POSTGRES_USER', 'django_backend'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'super_secret_password'),
             'HOST': os.environ.get('DB_HOST', 'localhost'),
             'PORT': os.environ.get('DB_PORT', '5432'),
         }
@@ -186,6 +186,12 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "core.pagination.PageNumberPaginationNoCount",
     "PAGE_SIZE": 10,
+
+  "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ] + (["rest_framework.renderers.BrowsableAPIRenderer"] if (os.environ.get('DEBUG', 'True') == 'True') else []),
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+MAX_ATTRIBUTE_INSTANCE_COUNT = 6

@@ -1,5 +1,4 @@
 <?xml version="1.0" ?>
-<robot generator="Robot Framework" generated="20231108T121329.899">
   <suite id="s1" name="Example Suite 1" source="/path/to/test/cases/suite1">
     <test id="t1" name="Test Case 1">
       <status status="PASS" starttime="20231108T121329.899" endtime="20231108T121418.899"/>
@@ -84,4 +83,3 @@
       <status status="PASS" starttime="20231108T121329.899" endtime="20231108T121359.899"/>
     </test>
   </suite>
-</robot>

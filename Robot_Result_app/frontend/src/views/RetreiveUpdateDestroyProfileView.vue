@@ -15,7 +15,7 @@
                   data-bs-toggle="modal" data-bs-target="#avatarModal" loading="lazy" />
                 <h5><b>{{ user.username }}</b></h5>
                 <br>
-                <button class="btn bg-french-grey clickable-item text-jet mb-2" v-if="!editMode" @click="startEdit">Edit
+                <button class="btn bg-french-grey clickable-item text-jet mb-2" v-if="!editMode" id="editProfile" @click="startEdit">Edit
                   Profile</button>
                 <button class="btn bg-french-grey clickable-item text-jet mb-2" data-bs-toggle="modal"
                   data-bs-target="#changePasswordModal">Change
@@ -146,7 +146,7 @@
                       </div>
                       <button type="submit" class="btn bg-ucla-blue clickable-item text-seasalt me-2">Save</button>
                       <button @click="cancelEdit" class="btn btn-secondary bg-ucla-blue">Cancel</button>
-                      <button class="btn btn-link hover-zoom-icon" data-bs-toggle="modal"
+                      <button id="delProf" class="btn btn-link hover-zoom-icon" data-bs-toggle="modal"
                         data-bs-target="#userDeleteModal">
                         <font-awesome-icon icon="fa-solid fa-trash" style="color: red;" size="2xl" />
                       </button>
@@ -167,7 +167,7 @@
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                          <button type="button" class="btn btn-danger" @click="deleteUser()"
+                          <button id="delProfConfirm" type="button" class="btn btn-danger" @click="deleteUser()"
                             data-bs-dismiss="modal">Yes</button>
                         </div>
                       </div>

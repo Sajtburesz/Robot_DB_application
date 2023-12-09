@@ -41,7 +41,6 @@ class TeamSerializer(serializers.ModelSerializer):
             return False
 
     def create(self, validated_data):
-        # Get authenticated user
         owner = self.context['request'].user
         validated_data['owner'] = owner
 
@@ -100,7 +99,7 @@ class RemoveMembersSerializer(serializers.ModelSerializer):
         members = validated_data.get('members', [])
 
         for user in members:
-            if user == instance.owner or user.is_superuser:
+            if user == instance.owner or user.is_superuser or user.is_staff:
                 raise serializers.ValidationError(f"User {user} can't be removed from team. (Owner OR Admin)")
             if user in instance.members.all():
                 TeamMembership.objects.filter(team=instance, user=user).delete()

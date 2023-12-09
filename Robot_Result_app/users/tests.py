@@ -12,11 +12,9 @@ class UserListViewTest(TestCase):
         self.client = APIClient()
         self.url = reverse('user-list')
 
-        # Authenticate the test client
         self.user = User.objects.create_user(username='testuser', password='password123')
         self.client.force_authenticate(user=self.user)
 
-        # Create multiple users to test the list and ordering
         User.objects.create(username='user1', password=make_password('password1'), email='user1@example.com')
         User.objects.create(username='user2', password=make_password('password2'), email='user2@example.com')
         User.objects.create(username='user3', password=make_password('password3'), email='user3@example.com')
@@ -24,35 +22,31 @@ class UserListViewTest(TestCase):
     def test_list_users(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 4)  # Adjusted for pagination
+        self.assertEqual(len(response.data['results']), 4)  
 
     def test_ordering_users(self):
         response = self.client.get(f'{self.url}?ordering=username')
-        usernames = [user['username'] for user in response.data['results']]  # Adjusted for pagination
+        usernames = [user['username'] for user in response.data['results']]  
         self.assertEqual(usernames, sorted(usernames))
 
     def test_filtering_users(self):
         response = self.client.get(f'{self.url}?username=user1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(all('user1' in user['username'] for user in response.data['results']))  # Adjusted for pagination
+        self.assertTrue(all('user1' in user['username'] for user in response.data['results'])) 
 
     def test_invalid_filtering(self):
         response = self.client.get(f'{self.url}?username=nonexistent')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 0)  # Adjusted for pagination
-
+        self.assertEqual(len(response.data['results']), 0) 
 class UserRetrieveUpdateDestroyViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create two users: one for testing, one as a target for retrieval, update, and delete
         self.test_user = User.objects.create_user(username='testuser', email='test@example.com', password='password123')
         self.target_user = User.objects.create_user(username='targetuser', email='targetuser@example.com', password='password123')
 
-        # URL for interacting with the target user
         self.url = reverse('user-detail', args=[self.target_user.username])
 
-        # Authenticate the test client with test_user
         self.client.force_authenticate(user=self.test_user)
 
     def test_retrieve_user(self):
@@ -72,12 +66,12 @@ class UserRetrieveUpdateDestroyViewTest(TestCase):
         self.assertFalse(User.objects.filter(username='testuser').exists())
 
     def test_unauthorized_update(self):
-        self.client.force_authenticate(user=None)  # Unauthenticate the client
+        self.client.force_authenticate(user=None)  
         response = self.client.patch(self.url, {'email': 'unauth@example.com'})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_unauthorized_delete(self):
-        self.client.force_authenticate(user=None)  # Unauthenticate the client
+        self.client.force_authenticate(user=None)  
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -86,7 +80,6 @@ class UserTeamsListViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create test users
         self.user = User.objects.create_user(
             username='testuser', 
             email='asdasd@example.com', 
@@ -98,13 +91,11 @@ class UserTeamsListViewTest(TestCase):
             password='password123'
         )
 
-        # Create teams
         self.team1 = Team.objects.create(name='Team 1', owner=self.user)
         self.team2 = Team.objects.create(name='Team 2', owner=self.user)
 
-        # Create memberships
         TeamMembership.objects.create(team=self.team1, user=self.user)
-        TeamMembership.objects.create(team=self.team2, user=self.user)  # Assuming other_user is also a member of team2
+        TeamMembership.objects.create(team=self.team2, user=self.user) 
 
         self.url = reverse('user-teams-list', args=[self.user.username])
         self.client.force_authenticate(user=self.user)
@@ -112,14 +103,13 @@ class UserTeamsListViewTest(TestCase):
     def test_get_user_teams(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.team1.name, [team['name'] for team in response.data['results']])  # Adjust according to your response structure
+        self.assertIn(self.team1.name, [team['name'] for team in response.data['results']])  
 
     def test_get_user_teams_no_teams(self):
-        # Test for a user with no teams
         self.client.force_authenticate(user=self.other_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 0)  # Adjust according to your response structure
+        self.assertEqual(len(response.data['results']), 0)  
 
     def test_unauthenticated_access(self):
         self.client.force_authenticate(user=None)

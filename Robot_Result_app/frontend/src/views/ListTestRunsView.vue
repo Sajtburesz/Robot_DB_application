@@ -1,22 +1,32 @@
 <template>
   <div class="container mt-5">
     <div class="row mb-4">
-      <!-- Dropdown for teams -->
-      <div class="col-md-4 d-flex align-items-center">
-        <div class="w-100 form-floating">
-          <select class="form-select form-select-sm" v-model="selectedTeam"
-            @change="fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/`)" id="teamSelect">
-            <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
-          </select>
-          <label for="floatingSelect">Select a Team</label>
+      <div class="col-md-4">
+        <div class="dropdown" ref="teamDropdown" id="teamDropdown">
+          <button class="btn btn-secondary dropdown-toggle w-100 bg-ucla-blue text-seasalt truncate" type="button"
+            id="team-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false" @click="toggleTeamDropdown()">
+            {{ selectedTeamName || 'Select a team' }}
+          </button>
+          <div class="dropdown-menu w-100" aria-labelledby="team-dropdown">
+            <div class="p-2">
+              <input type="text" id="filter" class="form-control mb-2 bg-seasalt text-jet" v-model="teamFilter"
+                placeholder="Type to filter..." @input="filterTeams()">
+            </div>
+            <ul class="list-group overflow-auto" style="max-height: 200px;">
+              <li class="list-group-item bg-seasalt text-jet bg-animation clickable-item " href="#"
+                v-for="team in filteredTeams" :key="team.id" @click.prevent="selectTeam(team)">
+                {{ team.name }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-
       <!-- Search Bar -->
       <div class="col-md-8 d-flex align-items-center">
         <div class="input-group w-100">
-          <input type="text" v-model="searchQuery" @input="handleQueryChange" class="form-control" placeholder="Filter test runs...">
-          <span class="input-group-text"><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></span> 
+          <input type="text" v-model="searchQuery" @input="handleQueryChange" class="form-control"
+            placeholder="Filter test runs...">
+          <span class="input-group-text"><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></span>
         </div>
       </div>
     </div>
@@ -24,41 +34,46 @@
     <!-- Selection Summary -->
     <div v-if="selectedTestRuns.length > 0" class="mb-3 d-flex justify-content-between align-items-center">
       <span>
-        Selected for compare ({{ selectedTestRuns.length}}/2): {{ selectedTestRuns.map(testRun => testRun.id).join(', ') }}
+        Selected for compare ({{ selectedTestRuns.length }}/2): {{ selectedTestRuns.map(testRun => testRun.id).join(', ')
+        }}
       </span>
       <div>
-        <button v-if="selectedTestRuns.length === 2" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm" @click="compareTestRuns">Compare</button>
-        <font-awesome-icon v-if="selectedTestRuns.length > 0"  class="btn btn-link hover-zoom-icon" @click="deleteSelectedTestruns()" icon="fa-solid fa-xmark" />
+        <button v-if="selectedTestRuns.length === 2" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm"
+          @click="compareTestRuns">Compare</button>
+        <font-awesome-icon v-if="selectedTestRuns.length > 0" class="btn btn-link hover-zoom-icon"
+          @click="deleteSelectedTestruns()" icon="fa-solid fa-xmark" />
       </div>
     </div>
 
     <!-- Display test runs -->
-    <div v-for="testRun in testRuns" :key="testRun.id" class="card mb-3">
+    <div v-for="(testRun,index) in testRuns" :key="testRun.id" class="card mb-3">
       <div class="form-check ms-2 mt-2">
-      <input class="form-check-input me-2" id="compareCheckbox" type="checkbox" v-model="selectedTestRuns" :value="testRun" @change="selectTestRun(testRun)">
-      <label for="compareCheckbox" class="form-check-label text-muted">Add to compare</label>
-    </div>
-      <router-link :to="{ name: 'TestRunView', params:{ teamId: `${this.selectedTeam}`, testRunId:`${testRun.id}` } }" class="text-decoration-none">
+        <input class="form-check-input me-2" :id="'compareCheckbox' + testRun.id " type="checkbox" v-model="selectedTestRuns"
+          :value="testRun" @change="selectTestRun(testRun)">
+        <label for="compareCheckbox" class="form-check-label text-muted">Add to compare</label>
+      </div>
+      <router-link :id="'testrun' +  index" :to="{ name: 'TestRunView', params: { teamId: `${this.selectedTeam}`, testRunId: `${testRun.id}` } }"
+        class="text-decoration-none">
         <div class="card-body">
           <h5 class="card-title">Test Run #{{ testRun.id }} - {{ testRun.name }}</h5>
-          <div v-if="testRun.is_public" class="badge bg-success">Public</div>
+          <div v-if="testRun.is_public" class="badge bg-success" id="is_public">Public</div>
           <div class="card-text mt-2">
-          <div class="row">
-            <div class="col-12 col-md-6" v-for="(value, key) in firstTwoAttributes(testRun.attributes)" :key="key">
-              <strong>{{ key }}:</strong> {{ value || 'None' }}
-            </div>
-          </div>
-          <div v-if="Object.keys(testRun.attributes).length > 2">
-            <div v-if="testRun.showAllAttributes" class="row mt-2">
-              <div class="col-12 col-md-6" v-for="(value, key) in remainingAttributes(testRun.attributes)" :key="key">
+            <div class="row">
+              <div class="col-12 col-md-6" v-for="(value, key) in firstTwoAttributes(testRun.attributes)" :key="key">
                 <strong>{{ key }}:</strong> {{ value || 'None' }}
               </div>
             </div>
-            <button class="btn btn-link p-0" type="button" @click.prevent="toggleShowAllAttributes(testRun)">
-              {{ testRun.showAllAttributes ? 'Show less' : 'Show more' }}
-            </button>
+            <div v-if="Object.keys(testRun.attributes).length > 2">
+              <div v-if="testRun.showAllAttributes" class="row mt-2">
+                <div class="col-12 col-md-6" v-for="(value, key) in remainingAttributes(testRun.attributes)" :key="key">
+                  <strong>{{ key }}:</strong> {{ value || 'None' }}
+                </div>
+              </div>
+              <button class="btn btn-link p-0" type="button" @click.prevent="toggleShowAllAttributes(testRun)">
+                {{ testRun.showAllAttributes ? 'Show less' : 'Show more' }}
+              </button>
+            </div>
           </div>
-        </div>
           <p class="card-text text-muted small">Executed at: {{ new Date(testRun.executed_at).toLocaleDateString() }}</p>
         </div>
       </router-link>
@@ -86,6 +101,9 @@ export default {
     return {
       teams: [],
       selectedTeam: null,
+      selectedTeamName: null,
+      teamFilter: '',
+      filteredTeams: [],
       testRuns: [],
       nextPageUrl: null,
       previousPageUrl: null,
@@ -116,10 +134,12 @@ export default {
           url = response.data.next;
         }
         this.teams = allTeams;
+        this.filteredTeams = this.teams;
 
-        this.teams.unshift({id:"public",name:"public"});
+        this.teams.unshift({ id: "public", name: "public" });
         this.selectedTeam = this.teams[0].id;
-      
+        this.selectedTeamName = this.teams[0].name;
+
         await this.fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/`);
       } catch (error) {
         this.$toast.error(`Error fetching teams.`);
@@ -131,7 +151,7 @@ export default {
         this.testRuns = response.data.results.map(tr => ({ ...tr, showAllAttributes: false }));
         this.nextPageUrl = response.data.next;
         this.previousPageUrl = response.data.previous;
-        
+
       } catch (error) {
         this.$toast.error(`Error during fetching test runs.`);
       }
@@ -159,11 +179,11 @@ export default {
       }
 
       if (this.selectedTeam === 'public') {
-        if (this.wayOfAccess.includes(testRun.id)){
+        if (this.wayOfAccess.includes(testRun.id)) {
           this.wayOfAccess = this.wayOfAccess.filter(item => item !== testRun.id);
           this.$store.dispatch('setWayOfAccess', []);
           this.$store.dispatch('setWayOfAccess', this.wayOfAccess);
-        }else {
+        } else {
           this.wayOfAccess.push(testRun.id);
           this.$store.dispatch('setWayOfAccess', []);
           this.$store.dispatch('setWayOfAccess', this.wayOfAccess);
@@ -175,19 +195,40 @@ export default {
     compareTestRuns() {
       this.$router.push({ name: 'CompareTestRunView' });
     },
-    fetchStoredTestRuns(){
+    fetchStoredTestRuns() {
       this.storedTestRuns.map(testrun => this.selectedTestRuns.push(testrun));
     },
-    deleteSelectedTestruns(){
+    deleteSelectedTestruns() {
       this.selectedTestRuns = [];
       this.$store.dispatch('setTestRuns', []);
-    }
+    },
+
+    filterTeams() {
+      if (this.teamFilter) {
+        this.filteredTeams = this.teams.filter((team) =>
+          team.name.toLowerCase().includes(this.teamFilter.toLowerCase())
+        );
+      } else {
+        this.filteredTeams = this.teams;
+      }
+    },
+    selectTeam(team) {
+      this.selectedTeam = team.id;
+      this.selectedTeamName = team.name;
+      this.teamFilter = '';
+      this.filteredTeams = this.teams;
+      this.$refs.teamDropdown.classList.remove('show');
+      this.selectedTeamName = team.name;
+      this.fetchTestRuns(`/api/v1/teams/${this.selectedTeam}/test-runs/`);
+    },
+    toggleTeamDropdown() {
+      this.$refs.teamDropdown.classList.toggle('show');
+    },
   }
 };
 </script>
 
 <style scoped>
-
 /* Team selection dropdown and search bar */
 .form-select-sm {
   max-width: 300px;
@@ -253,10 +294,9 @@ export default {
 }
 
 .hover-zoom-icon {
-    transition: transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .hover-zoom-icon:hover {
-    transform: scale(1.1);
-}
-</style>
+  transform: scale(1.1);
+}</style>
