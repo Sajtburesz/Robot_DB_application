@@ -26,7 +26,7 @@
 
                 <!-- Right side: Delete Team / Leave Team button -->
                 <div class="col-6 text-end">
-                    <button class="btn btn-danger" v-if="(owner || isAdmin)" @click="deleteTeam">Delete Team</button>
+                    <button class="btn btn-danger" v-if="(owner || isAdmin)" @click="deleteTeam" id="delete_team_button">Delete Team</button>
                     <button class="btn btn-danger" v-else @click="leaveTeam">Leave Team</button>
                 </div>
             </div>

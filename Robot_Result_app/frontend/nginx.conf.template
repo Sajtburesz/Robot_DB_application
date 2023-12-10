@@ -1,8 +1,9 @@
 server {
     listen 80;
-    server_name ${NGINX_HOST};  # Automatically Replace with your domain
-
-    # Location for Vue.js build artifacts
+    server_name ${NGINX_HOST};  
+    client_max_body_size 500M;
+    
+    # Location for Vue.js build
     location / {
         root /usr/share/nginx/html;
         index index.html;
@@ -14,7 +15,7 @@ server {
         alias /robot_db/staticfiles/;
     }
 
-    # Proxying requests to your Django backend (Gunicorn)
+    # Proxying requests to Django
     location /api/ {
         proxy_pass http://backend:${BACKEND_PORT};
         proxy_set_header Host $host;

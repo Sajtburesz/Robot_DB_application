@@ -8,7 +8,7 @@
           <div>
             <span class="badge" :class="`badge-${testRun.status === 'FAIL' ? 'danger' : 'success'}`">{{ testRun.status
             }}</span>
-            <button class="btn btn-link ms-2" @click="showTestRunDetails = !showTestRunDetails">
+            <button class="btn btn-link ms-2" id="testrundetails" @click="showTestRunDetails = !showTestRunDetails">
               <font-awesome-icon
                 :icon="showTestRunDetails ? 'fa-solid fa-circle-arrow-up' : 'fa-solid fa-circle-arrow-down'" />
             </button>
@@ -19,12 +19,12 @@
             <div class="d-flex justify-content-between align-items-center">
               <span><strong>Executed At:</strong> {{ new Date(testRun.executed_at).toLocaleString() }}</span>
               <div>
-                <button v-if="isPublic && (this.role !== 'Member' || isAdmin)" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm me-2"
+                <button id="editbutton" v-if="isNotPublic && (this.role !== 'Member' || isAdmin)" class="btn bg-ucla-blue clickable-item text-seasalt btn-sm me-2"
                   @click="toggleEditMode">{{ editMode ? 'Save' : 'Edit'
                   }}</button>
-                <button v-if="editMode && isPublic && (this.role !== 'Member' || isAdmin)" class="btn btn-secondary btn-sm me-2"
+                <button v-if="editMode && isNotPublic && (this.role !== 'Member' || isAdmin)" class="btn btn-secondary btn-sm me-2"
                   @click="cancelEdit">Cancel</button>
-                <button v-if="isPublic && (this.role !== 'Member' || isAdmin)" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                <button v-if="isNotPublic && (this.role !== 'Member' || isAdmin)" class="btn btn-danger btn-sm" @click.prevent data-bs-toggle="modal"
                   data-bs-target="#testRunDeleteModal">
                   <font-awesome-icon icon="fa-solid fa-trash" />
                 </button>
@@ -32,11 +32,11 @@
             </div>
           </div>
           <div v-if="editMode" class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" v-model="testRun.is_public">
+            <input id='public_testrun' class="form-check-input" type="checkbox" v-model="testRun.is_public">
             <label class="form-check-label" for="flexSwitchCheckChecked">Public</label>
           </div>
           <div v-else>
-            <p v-if="testRun.is_public"><strong>Public Testrun</strong></p>
+            <p v-if="testRun.is_public" ><strong>Public Testrun</strong></p>
           </div>
           <ul class="list-group mb-3">
             <li v-for="(value, key) in testRun.attributes" :key="key" class="list-group-item">
@@ -161,7 +161,7 @@ export default {
     this.loadTestRun();
   },
   computed: {
-    isPublic() {
+    isNotPublic() {
       return this.teamId !== 'public';
     },
     isAdmin() {

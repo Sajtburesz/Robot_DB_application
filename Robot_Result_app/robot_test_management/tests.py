@@ -17,10 +17,9 @@ class TestRunCreateViewTest(TestCase):
         self.client.force_authenticate(user=self.user)
         self.team = Team.objects.create(name='Test Team',owner=self.user)
         TeamMembership.objects.create(team=self.team, user=self.user)
-        self.url = reverse('testrun_upload')  # Update with the correct URL name
+        self.url = reverse('testrun_upload')  
 
     def test_create_test_run_success(self):
-        # Prepare a dummy file or data that mimics the robot output XML
         with open('test_data/output_1.xml', 'rb') as file:
             data = {
                 'output_file': file,
@@ -44,7 +43,6 @@ class TestRunCreateViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_test_run_invalid_data(self):
-        # Test with invalid data
         data = {
             'output_file': '',
             'team': self.team.id,
@@ -57,49 +55,40 @@ class TestRunListViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.user = User.objects.create_user(username='testuser', email='user1@example.com', password='password123')
         self.another_user = User.objects.create_user(username='otheruser', email='user2@example.com', password='password123')
         self.client.force_authenticate(user=self.user)
 
-        # Create teams
         self.team = Team.objects.create(name='Test Team', owner=self.user)
         self.another_team = Team.objects.create(name='Another Team', owner=self.another_user)
 
-        # Create test runs
         self.test_run = TestRun.objects.create(team=self.team, is_public=False,attributes={}, executed_at=timezone.now())
         self.public_test_run = TestRun.objects.create(team=self.another_team, is_public=True,attributes={}, executed_at=timezone.now())
 
-        # URL for listing test runs
         self.url = reverse('testrun-list', kwargs={'teamId': self.team.id})
 
     def test_list_test_runs_for_forign_team(self):
-        # Test listing test runs for a specific team
         response = self.client.get(self.url)
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)
     
     def test_list_test_runs_for_team(self):
-        # Test listing test runs for a specific team
         TeamMembership.objects.create(team=self.team, user=self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.test_run.id, [run['id'] for run in response.data['results']])
 
     def test_list_test_runs_unauthenticated(self):
-        # Test unauthenticated access to the list view
         self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_public_test_runs(self):
-        # Test listing public test runs
         public_url = reverse('testrun-list', kwargs={'teamId': 'public'})
         response = self.client.get(public_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.public_test_run.id, [run['id'] for run in response.data['results']])
 
     def test_list_test_runs_for_non_member(self):
-        # Test that a non-member cannot see private test runs
         self.client.force_authenticate(user=self.another_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -135,12 +124,10 @@ class TestRunRetreiveViewActionTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.owner = User.objects.create_user(username='owner',email='user1@example.com', password='password123')
         self.member = User.objects.create_user(username='member',email='user2@example.com', password='password123')
         self.admin = User.objects.create_user(username='admin',email='user3@example.com', password='password123', is_staff=True)
 
-        # Create team and test run
         self.team = Team.objects.create(name='Test Team', owner=self.owner)
         self.test_run = TestRun.objects.create(team=self.team, attributes={}, is_public=False)
         TeamMembership.objects.create(team=self.team, user=self.member)
@@ -209,11 +196,10 @@ class TestRunRetreivePublicViewTest(TestCase):
 class AttributeViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        # Create admin and non-admin users
+
         self.admin_user = User.objects.create_user(username='admin',email='user1@example.com', password='password123', is_staff=True)
         self.non_admin_user = User.objects.create_user(username='nonadmin',email='user2@example.com', password='password123')
 
-        # Create a sample attribute
         self.attribute = Attributes.objects.create(key_name='sample_key')
 
     def test_edit_attribute_as_non_admin(self):
@@ -252,12 +238,12 @@ class CommentViewTest(TestCase):
         data = {'testrun':self.test_run.id,'text': 'New Comment'}
         response = self.client.post(self.url_list_create, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Comment.objects.count(), 2)  # Assuming one comment already exists
+        self.assertEqual(Comment.objects.count(), 2)  
     
     def test_list_comments(self):
         response = self.client.get(self.url_list_create)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 1)  # Adjust depending on your pagination settings
+        self.assertEqual(len(response.data['results']), 1) 
     
     def test_edit_comment_as_owner(self):
         self.client.force_authenticate(user=self.user)

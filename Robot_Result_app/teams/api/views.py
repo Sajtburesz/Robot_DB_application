@@ -72,7 +72,7 @@ class LeaveTeamView(APIView):
 class UpdateRoleView(generics.UpdateAPIView):
     queryset = TeamMembership.objects.all()
     serializer_class = RoleSerializer
-    permission_classes = [IsAuthenticated, IsTeamOwnerByPropertyOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
 
     def put(self, request, *args, **kwargs):
@@ -83,15 +83,12 @@ class UpdateRoleView(generics.UpdateAPIView):
         except TeamMembership.DoesNotExist:
             return Response({"error": "Invalid username or team ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the requesting user has the authority to change 'is_maintainer'
         if not self.can_change_maintainer_status(request.user):
             return Response({"error": "Not authorized to change maintainer status."}, status=status.HTTP_403_FORBIDDEN)
 
-        # Update the is_maintainer attribute
         team_membership.is_maintainer = request.data.get('is_maintainer', team_membership.is_maintainer)
         team_membership.save()
 
-        # Return the updated team membership details
         serializer = self.get_serializer(team_membership)
         return Response(serializer.data)
     

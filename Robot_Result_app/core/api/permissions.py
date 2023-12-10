@@ -38,10 +38,8 @@ class IsTeamOwnerByPropertyOrReadOnly(permissions.BasePermission):
         if request.method == 'DELETE':
             return request.user.is_superuser or team.owner == request.user or request.user.is_staff
 
-        # Check if the user is a maintainer
         maintainer = membership and membership.is_maintainer
         
-        # Return True if the user is the owner, a maintainer, staff, or a superuser
         return team.owner == request.user or maintainer or request.user.is_superuser or request.user.is_staff
 
     

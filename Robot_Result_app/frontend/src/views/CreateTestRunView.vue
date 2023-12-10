@@ -124,7 +124,22 @@ export default {
                 this.$toast.success("Upload Successfull");
                 this.$router.push({ name: 'TestRunView', params: { "teamId" : response.data.team, "testRunId":response.data.id } });
             } catch (error) {
-                this.$toast.error(`Something went wrong during test run upload. Please check the uploaded file. Response Text: ${error.request.statusText}`, {
+                let messages = [];
+                if (error.response.status === 500) {
+                    this.$toast.error(`Something went wrong during test run upload.`, {
+                    duration: 4000,
+                    });
+                    return;
+                }
+                if (Array.isArray(error.response.data)) {
+                messages = [...error.response.data];
+                } else {
+                    for (const [key, errors] of Object.entries(error.response.data)) {
+                        errors.forEach(error => messages.push(`${key}: ${error}`));
+                    }
+                }
+
+                this.$toast.error(`Something went wrong during test run upload. ${messages.join(". ")}`, {
                     duration: 4000,
                 });
                 return;

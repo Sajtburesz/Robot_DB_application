@@ -6,7 +6,7 @@ services:
       context: ./db
     stop_signal: SIGTERM
     volumes:
-       - /path/to/backup/file.sql:/db_base/base.sql # Optional "backup.sql" file from previous instance of application
+       - /path/to/backup.sql:/db_base/base.sql # Optional "backup.sql" file from previous instance of application
        - ./db/db_backup/:/db_backup/ # Backup folder location (default is shown here, folder and backup.sql inside it must exist before container starts)
     environment:
      - POSTGRES_DB=robot_db # Database Name
@@ -29,11 +29,14 @@ services:
      - SECRET_KEY=very_secret_key # Django secret
      - DEBUG=False # Debug option (Should be False in production env)
      - DB_HOST=db # Postgres DB host (if db is started with current docker-compose than don't touch)
-     - DB_NAME=robot_db # Postgres DB name
-     - DB_USER=django_backend # Postgres DB user
-     - DB_PASSWORD=super_secret_password  # Postgres DB password
-     - PORT=5432 # DB PORT 
+     - POSTGRES_DB=robot_db # Postgres DB name
+     - POSTGRES_USER=django_backend # Postgres DB user
+     - POSTGRES_PASSWORD=super_secret_password  # Postgres DB password
+     - DB_PORT=5432 # DB PORT 
      - NGINX_PORT=8080 # NGINX port is the same where nginx is exposed, this is needed so frontend is whitelisted to make http requests to backend 
+     - NGINX_HOST=localhost # NGINX Host, same as the one at NGINX HOST
+     - ADMIN_USERNAME=admin # Initail superuser username
+     - ADMIN_PASSWORD=admin # Password for superuser
     depends_on:
       db:
         condition: service_healthy

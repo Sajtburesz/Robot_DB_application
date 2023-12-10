@@ -32,7 +32,8 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = ['http://*']
 
 NGINX_PORT=os.environ.get('NGINX_PORT', '8000')
-CSRF_TRUSTED_ORIGINS = [f'http://127.0.0.1:{NGINX_PORT}',f'http://localhost:{NGINX_PORT}']
+NGINX_HOST=os.environ.get('NGINX_HOST', 'localhost')
+CSRF_TRUSTED_ORIGINS = [f'http://127.0.0.1:{NGINX_PORT}',f'http://{NGINX_HOST}:{NGINX_PORT}']
 
 
 # Application definition
@@ -103,9 +104,9 @@ if os.environ.get('TESTING') != 'True':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'robot_db'),
-            'USER': os.environ.get('DB_USER', 'django_backend'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'super_secret_password'),
+            'NAME': os.environ.get('POSTGRES_DB', 'robot_db'),
+            'USER': os.environ.get('POSTGRES_USER', 'django_backend'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'super_secret_password'),
             'HOST': os.environ.get('DB_HOST', 'localhost'),
             'PORT': os.environ.get('DB_PORT', '5432'),
         }
@@ -113,12 +114,8 @@ if os.environ.get('TESTING') != 'True':
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'robot_db',
-            'USER': 'django_backend',
-            'PASSWORD': 'super_secret_password',
-            'HOST': 'localhost',
-            'PORT': '5432',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': str(BASE_DIR / 'test_db.sqlite3'),
         }
     }
 
@@ -189,6 +186,12 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "core.pagination.PageNumberPaginationNoCount",
     "PAGE_SIZE": 10,
+
+  "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ] + (["rest_framework.renderers.BrowsableAPIRenderer"] if (os.environ.get('DEBUG', 'True') == 'True') else []),
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+MAX_ATTRIBUTE_INSTANCE_COUNT = 6

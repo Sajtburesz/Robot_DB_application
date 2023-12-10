@@ -4,57 +4,55 @@
     <!-- Container wrapper -->
     <div class="container-fluid">
       <!-- Toggle button -->
-      <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarSupportedContent"
+      <button class="navbar-toggler btn btn-link ms-2" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
+        <font-awesome-icon icon="fa-solid fa-bars" />
       </button>
 
       <!-- Collapsible wrapper -->
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
         <!-- Navbar brand -->
         <router-link class="navbar-brand mt-lg-o" :to="{ name: 'home' }">
           <img src="/static/images/Robot-framework-logo.png" height="40"
-            alt="MDB Logo" loading="lazy" />
+            alt="Robot Framework Logo" loading="lazy" />
         </router-link>
         <!-- Left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
+          <li class="nav-item me-2">
             <router-link class="nav-link fw-bold" :to="{ name: 'ListTestRunsView' }">Test Runs</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item me-2">
             <router-link class="nav-link fw-bold" :to="{ name: 'CreateTeamView' }">Team</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item me-2">
             <router-link class="nav-link fw-bold shadow p-2 mb-1 bg-body rounded upload-navlink upload-navlink-animation" :to="{ name: 'CreateTestRunView' }">Upload</router-link>
           </li>
-          <li class="nav-item" v-if="isAdmin">
+          <li class="nav-item me-2" v-if="isAdmin">
             <router-link class="nav-link fw-bold" :to="{ name: 'ManageAttributesView' }">Admin</router-link>
           </li>
         </ul>
         <!-- Left links -->
+        <!-- Right elements -->
+        <div class="d-flex align-items-center">
+          <!-- Avatar -->
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownMenuLink" type="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <img v-if="getAvatar" :src="`/static/avatars/${getAvatar}`" class="rounded-circle" height="50"
+              alt="Portrait of a Woman" loading="lazy" />
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+            <li>
+              <router-link class="dropdown-item" :to="{ name: 'RetreiveUpdateDestroyeProfileView' }">My profile</router-link>
+            </li>
+            <li>
+              <a class="dropdown-item" href="/accounts/logout/">Logout</a>
+            </li>
+          </ul>
+        </div>
+        <!-- Right elements -->
       </div>
       <!-- Collapsible wrapper -->
 
-      <!-- Right elements -->
-      <div class="d-flex align-items-center">
-        <!-- Avatar -->
-        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownMenuLink" type="button"
-          data-bs-toggle="dropdown" aria-expanded="false">
-          <img v-if="getAvatar" :src="`/static/avatars/${getAvatar}`" class="rounded-circle" height="50"
-            alt="Portrait of a Woman" loading="lazy" />
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-          <li>
-            <router-link class="dropdown-item" :to="{ name: 'RetreiveUpdateDestroyeProfileView' }">My profile</router-link>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#">Settings</a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="/accounts/logout/">Logout</a>
-          </li>
-        </ul>
-      </div>
     </div>
     <!-- Container wrapper -->
   </nav>
@@ -101,6 +99,55 @@ export default {
 .upload-navlink:hover{
   background-color: #3a6f8fff !important; 
   color: #f7f7f7ff !important;
+}
+
+
+@media (max-width: 399px) {
+  .navbar-expand-lg .navbar-toggler {
+    display: block;
+  }
+
+  .navbar-expand-lg .navbar-collapse {
+    display: none;
+  }
+  .navbar-expand-lg {
+    flex-wrap: wrap;
+  }
+
+  .navbar-expand-lg .navbar-collapse {
+    flex-basis: 100%;
+    justify-content: center;
+  }
+
+  .navbar-expand-lg .d-flex {
+    margin-top: 0.5rem; /* Adjust this as needed */
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+@media (min-width: 400px) {
+  .navbar-expand-lg .navbar-nav .nav-item {
+    display: flex;
+  }
+
+  .navbar-expand-lg .navbar-nav {
+    flex-direction: row;
+  }
+    .navbar-expand-lg .navbar-collapse {
+    justify-content: flex-start;
+  }
+
+  .navbar-expand-lg .d-flex {
+    justify-content: flex-end;
+  }
+  .navbar-expand-lg .navbar-toggler {
+    display: none;
+  }
+
+  .navbar-expand-lg .navbar-collapse {
+    display: flex;
+  }
 }
 
 </style>

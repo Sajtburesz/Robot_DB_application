@@ -9,11 +9,9 @@ class CreateTeamViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create a user and authenticate
         self.user = User.objects.create_user(username='creator', email='creator@example.com', password='password123')
         self.client.force_authenticate(user=self.user)
 
-        # URL for creating a team
         self.url = reverse('create-team')
 
     def test_create_team_success(self):
@@ -23,7 +21,7 @@ class CreateTeamViewTest(TestCase):
         self.assertTrue(Team.objects.filter(name='New Team').exists())
 
     def test_create_team_unauthenticated(self):
-        self.client.force_authenticate(user=None)  # Unauthenticate the client
+        self.client.force_authenticate(user=None) 
         payload = {'name': 'New Team'}
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -43,22 +41,18 @@ class AddTeamMembersViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.owner_user = User.objects.create_user(username='owner',email='user0@example.com', password='password123')
         self.admin_user = User.objects.create_user(username='admin',email='user1@example.com', password='password123', is_staff=True, is_superuser=True)
         self.maintainer_user = User.objects.create_user(username='maintainer', email='user2@example.com', password='password123')
         self.member_user = User.objects.create_user(username='member',email='user3@example.com', password='password123')
         self.new_member = User.objects.create_user(username='new_member', email='user4@example.com',password='password123')
 
-        # Create a team
         self.team = Team.objects.create(name='Test Team', owner=self.owner_user)
 
-        # Add maintainer and member
         TeamMembership.objects.create(team=self.team, user=self.admin_user)
         TeamMembership.objects.create(team=self.team, user=self.maintainer_user, is_maintainer=True)
         TeamMembership.objects.create(team=self.team, user=self.member_user)
 
-        # URL for adding team members
         self.url = reverse('add-members', args=[self.team.id])
     def test_add_wrong_payload_as_owner_(self):
         self.client.force_authenticate(user=self.admin_user)
@@ -90,21 +84,17 @@ class RemoveTeamMembersViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.owner_user = User.objects.create_user(username='owner',email='user0@example.com', password='password123')
         self.admin_user = User.objects.create_user(username='admin',email='user1@example.com', password='password123', is_staff=True, is_superuser=True)
         self.maintainer_user = User.objects.create_user(username='maintainer', email='user2@example.com', password='password123')
         self.member_user = User.objects.create_user(username='member',email='user3@example.com', password='password123')
 
-        # Create a team
         self.team = Team.objects.create(name='Test Team', owner=self.owner_user)
 
-        # Add maintainer and member
         TeamMembership.objects.create(team=self.team, user=self.admin_user)
         TeamMembership.objects.create(team=self.team, user=self.maintainer_user, is_maintainer=True)
         TeamMembership.objects.create(team=self.team, user=self.member_user)
 
-        # URL for adding team members
         self.url = reverse('remove-members', args=[self.team.id])
 
     def test_remove_wrong_payload_as_owner_(self):
@@ -143,13 +133,11 @@ class RetrieveUpdateDestroyTeamViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.owner = User.objects.create_user(username='owner',email='user0@example.com', password='password123')
         self.admin = User.objects.create_user(username='admin',email='user1@example.com', password='password123', is_staff=True, is_superuser=True)
         self.maintainer = User.objects.create_user(username='maintainer', email='user2@example.com', password='password123')
         self.member = User.objects.create_user(username='member',email='user3@example.com', password='password123')
 
-        # Create a team and add members
         self.team = Team.objects.create(name='Test Team', owner=self.owner)
         TeamMembership.objects.create(team=self.team, user=self.owner)
         TeamMembership.objects.create(team=self.team, user=self.member)
@@ -157,7 +145,6 @@ class RetrieveUpdateDestroyTeamViewTest(TestCase):
         TeamMembership.objects.create(team=self.team, user=self.admin)
 
 
-        # URL for the team
         self.url = reverse('manage-team', args=[self.team.id])
 
     def test_retrieve_team(self):
@@ -195,14 +182,12 @@ class LeaveTeamViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.owner = User.objects.create_user(username='owner',email='user0@example.com', password='password123')
         self.admin = User.objects.create_user(username='admin',email='user1@example.com', password='password123', is_staff=True, is_superuser=True)
         self.maintainer = User.objects.create_user(username='maintainer', email='user2@example.com', password='password123')
         self.member = User.objects.create_user(username='member',email='user3@example.com', password='password123')
         self.member2 = User.objects.create_user(username='member2',email='user4@example.com', password='password123')
 
-        # Create a team and add members
         self.team = Team.objects.create(name='Test Team', owner=self.owner)
         TeamMembership.objects.create(team=self.team, user=self.owner)
         TeamMembership.objects.create(team=self.team, user=self.member)
@@ -210,7 +195,6 @@ class LeaveTeamViewTest(TestCase):
         TeamMembership.objects.create(team=self.team, user=self.admin)
 
 
-        # URL for the team
         self.url = reverse('leave-team', args=[self.team.id])
 
     def test_leave_team_as_owner(self):
@@ -247,20 +231,17 @@ class UpdateRoleViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create users
         self.owner = User.objects.create_user(username='owner',email='user1@example.com',password='password123')
         self.admin = User.objects.create_user(username='admin',email='user2@example.com', password='password123', is_staff=True)
         self.maintainer = User.objects.create_user(username='maintainer',email='user3@example.com', password='password123')
         self.member = User.objects.create_user(username='member',email='user4@example.com',password='password123')
 
-        # Create a team and add members
         self.team = Team.objects.create(name='Test Team', owner=self.owner)
         TeamMembership.objects.create(team=self.team, user=self.owner)
         TeamMembership.objects.create(team=self.team, user=self.admin)
         TeamMembership.objects.create(team=self.team, user=self.maintainer, is_maintainer=True)
         TeamMembership.objects.create(team=self.team, user=self.member)
 
-        # URL for updating roles
         self.url = reverse('roles', args=[self.team.id])
 
     def test_update_role_as_owner(self):
@@ -268,14 +249,12 @@ class UpdateRoleViewTest(TestCase):
         payload = {'username': self.member.username, 'new_role': 'maintainer'}
         response = self.client.put(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Assert role update here
 
     def test_update_role_as_admin(self):
         self.client.force_authenticate(user=self.admin)
         payload = {'username': self.maintainer.username, 'new_role': 'member'}
         response = self.client.put(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Assert role update here
 
     def test_update_role_as_maintainer(self):
         self.client.force_authenticate(user=self.maintainer)

@@ -44,7 +44,7 @@ class TestRunCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-# Testrun Views nonPublic
+# Testrun Views
 class TestRunListView(generics.ListAPIView):
     serializer_class = TestRunListSerializer
     
@@ -227,6 +227,8 @@ class TopFailingTestCasesView(APIView):
 
 
 class DateRangeView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, teamId, format=None):
     
         if teamId == "public":
@@ -249,6 +251,8 @@ class DateRangeView(APIView):
             
 
 class TreemapDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, teamId, format=None):
            
         start_date = request.query_params.get('start_date')
@@ -288,11 +292,12 @@ class TreemapDataView(APIView):
         return Response(treemap_data, status=status.HTTP_200_OK)
 
 class TimelineDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, teamId, format=None):
         start_date = request.query_params.get('start_date')
         suite_filter = request.query_params.get('suite_filter', '')
 
-        # Query to get the test cases and their failure periods
         if teamId == "public":
                 test_case_runs = TestCase.objects.filter(
                     suite__test_run__is_public=True,
@@ -319,13 +324,11 @@ class TimelineDataView(APIView):
         if start_date:
             test_case_runs = test_case_runs.filter(suite__test_run__executed_at__gte=start_date)
 
-        # Group by test case name and create the timeline data
         timeline_data = {}
         for run in test_case_runs:
             test_case_name = run['name']
             executed_at = run['executed_at']
 
-            # Check if this is the first time we see this test case fail
             if test_case_name not in timeline_data:
                 timeline_data[test_case_name] = {
                     'test_case_name': test_case_name,
@@ -335,95 +338,85 @@ class TimelineDataView(APIView):
                     }]
                 }
             else:
-                # Get the last period of failure for the test case
                 last_period = timeline_data[test_case_name]['fail_periods'][-1]
                 last_fail_date = last_period['end'].date()
 
-                # Check if the current failure is consecutive (next day) to the last failure
                 if (executed_at.date() - last_fail_date).days == 1:
-                    # It is a consecutive failure, extend the end of the last period
                     last_period['end'] = executed_at
                 elif (executed_at.date() - last_fail_date).days > 1:
-                    # There was at least a day without failures, start a new period
                     timeline_data[test_case_name]['fail_periods'].append({
                         'start': executed_at,
                         'end': executed_at
                     })
 
-        # Convert to list and remove test cases with no failures
         timeline_data = [data for data in timeline_data.values() if data['fail_periods']]
 
         return Response(timeline_data, status=status.HTTP_200_OK)
 
 class TestCaseDurationHeatmapData(APIView):
-  def post(self, request, teamId):
-        # Retrieve suite name and date from the request data
-        suite_name = request.data.get('suite_name')
-        date_str = request.data.get('date')  # Expected format: "YYYY-MM"
-        
-        if not suite_name or not date_str:
-            return Response({'error': 'Suite name and date are required.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Parse the date and calculate the first day of the given month and the first day of the next month
-        year, month = map(int, date_str.split('-'))
-        first_day_of_month = datetime(year, month, 1)
-        if month == 12:
-            first_day_of_next_month = datetime(year + 1, 1, 1)
-        else:
-            first_day_of_next_month = datetime(year, month + 1, 1)
-        
-        # Filter test cases by the provided team pk, suite name, and date range
-        if teamId == "public":
-            test_cases = TestCase.objects.filter(
-                suite__name=suite_name,
-                suite__test_run__is_public=True,
-                suite__test_run__executed_at__gte=first_day_of_month,
-                suite__test_run__executed_at__lt=first_day_of_next_month
-            )
-        else:
-            try:
+    permission_classes = [IsAuthenticated]
+  
+    def post(self, request, teamId):
+            suite_name = request.data.get('suite_name')
+            date_str = request.data.get('date')  # Expected format "YYYY-MM"
+            
+            if not suite_name or not date_str:
+                return Response({'error': 'Suite name and date are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            year, month = map(int, date_str.split('-'))
+            first_day_of_month = datetime(year, month, 1)
+            if month == 12:
+                first_day_of_next_month = datetime(year + 1, 1, 1)
+            else:
+                first_day_of_next_month = datetime(year, month + 1, 1)
+            
+            if teamId == "public":
                 test_cases = TestCase.objects.filter(
                     suite__name=suite_name,
-                    suite__test_run__team__pk=teamId,
+                    suite__test_run__is_public=True,
                     suite__test_run__executed_at__gte=first_day_of_month,
                     suite__test_run__executed_at__lt=first_day_of_next_month
                 )
-            except ValueError:
-                return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                try:
+                    test_cases = TestCase.objects.filter(
+                        suite__name=suite_name,
+                        suite__test_run__team__pk=teamId,
+                        suite__test_run__executed_at__gte=first_day_of_month,
+                        suite__test_run__executed_at__lt=first_day_of_next_month
+                    )
+                except ValueError:
+                    return Response({"detail": "Team Id has to be integer or str public."}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-        # Get the list of unique testcases in the suite
-        testcase_names = test_cases.values_list('name', flat=True).distinct()
-        
-        # Prepare the heatmap data for each testcase
-        heatmap_data = []
-        for testcase_name in testcase_names:
-            # Filter test cases for the specific testcase name
-            testcase_runs = test_cases.filter(name=testcase_name)
             
-            # Calculate the average duration of the testcase across all runs
-            overall_average_duration = testcase_runs.aggregate(Avg('duration'))['duration__avg']
+            testcase_names = test_cases.values_list('name', flat=True).distinct()
             
-            # Aggregate average test case durations by day for the given month
-            daily_averages = (
-                testcase_runs
-                .annotate(day=TruncDay('suite__test_run__executed_at'))
-                .values('day')
-                .annotate(average_duration=Avg('duration'))
-                .order_by('day')
-            )
+            heatmap_data = []
+            for testcase_name in testcase_names:
+                testcase_runs = test_cases.filter(name=testcase_name)
+                
+                overall_average_duration = testcase_runs.aggregate(Avg('duration'))['duration__avg']
+                
+                daily_averages = (
+                    testcase_runs
+                    .annotate(day=TruncDay('suite__test_run__executed_at'))
+                    .values('day')
+                    .annotate(average_duration=Avg('duration'))
+                    .order_by('day')
+                )
+                
+                heatmap_data.append({
+                    'testcase_name': testcase_name,
+                    'overall_average_duration': overall_average_duration,
+                    'daily_averages': list(daily_averages)
+                })
             
-            # Append the data to the heatmap_data list
-            heatmap_data.append({
-                'testcase_name': testcase_name,
-                'overall_average_duration': overall_average_duration,
-                'daily_averages': list(daily_averages)
-            })
-        
-        return Response(heatmap_data)
+            return Response(heatmap_data)
 
 # Helper 
 class SuiteNames(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, teamId):
         if teamId == 'public':
             return Response(TestSuite.objects.filter(test_run__is_public=True).values_list('name', flat=True).distinct(), status=status.HTTP_200_OK)

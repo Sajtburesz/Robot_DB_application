@@ -22,7 +22,7 @@ if [ -f /db_base/base.sql ]; then
 else
     echo "No backup found. Starting with a fresh database."
 
-    # Perform all operations using the postgres user
+    # Setup user
     psql -v ON_ERROR_STOP=1 --username "postgres" <<-EOSQL
         CREATE DATABASE "$POSTGRES_DB";
         CREATE USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';
@@ -43,7 +43,6 @@ backup_db() {
     # Create a backup
     pg_dump -U $POSTGRES_USER $POSTGRES_DB > /db_backup/backup.sql 2>/db_backup/backup.log
 
-    # Check for success
     if [ $? -eq 0 ]; then
         echo "Backup successful."
         exit 0
@@ -54,8 +53,7 @@ backup_db() {
 
 }
 
-# Handle SIGTERM for backup
+
 trap 'backup_db' SIGTERM
 
-# Keep the script running to hold the container
 wait

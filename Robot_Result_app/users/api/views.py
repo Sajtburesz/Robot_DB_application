@@ -35,22 +35,17 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'username'
 
     def get_serializer_class(self):
-        # If querying a specific user
         if self.request.method == 'GET' and self.kwargs.get('username'):
-            # If the queried user matches the authenticated user
             if self.kwargs.get('username') == self.request.user.username:
                 return UserDetailSelfSerializer
-            # If querying someone else's details
             else:
                 return UserDetailOtherSerializer
 
-        # Default to the self detail serializer for other actions (e.g., update)
         if self.kwargs.get('username') == self.request.user.username:
             return UserDetailSelfSerializer
         else:
             return UserDetailOtherSerializer
 
-    # Ensure that only the authenticated user can edit their own profile
     def update(self, request, *args, **kwargs):
         if self.kwargs.get('username') != request.user.username:
             return Response({"detail": "You can only edit your own profile."}, status=status.HTTP_403_FORBIDDEN)
@@ -103,7 +98,6 @@ class GetSelfUsernameView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Get the username of the authenticated user
         username = request.user.username
         return Response({"username": username})
     
@@ -160,7 +154,6 @@ class ManageAdminRightsAPIView(views.APIView):
                 user.is_staff = True
                 user.save()
 
-                # Add the user to every team
                 self.add_user_to_all_teams(user)
 
             return Response({'status': 'success', 'message': 'Admin rights granted.'}, status=status.HTTP_200_OK)
