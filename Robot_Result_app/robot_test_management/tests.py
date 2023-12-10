@@ -20,7 +20,7 @@ class TestRunCreateViewTest(TestCase):
         self.url = reverse('testrun_upload')  
 
     def test_create_test_run_success(self):
-        with open('test_data/output_1.xml', 'rb') as file:
+        with open('test_data/output_2.xml', 'rb') as file:
             data = {
                 'output_file': file,
                 'team': self.team.id,
@@ -29,6 +29,18 @@ class TestRunCreateViewTest(TestCase):
             }
             response = self.client.post(self.url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
+    def test_create_test_run_fail(self):
+        with open('test_data/output_1.xml', 'rb') as file:
+            data = {
+                'output_file': file,
+                'team': self.team.id,
+                'attributes': json.dumps({}),
+                'is_public': False
+            }
+            response = self.client.post(self.url, data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_create_test_run_unauthenticated(self):
         self.client.force_authenticate(user=None) 
