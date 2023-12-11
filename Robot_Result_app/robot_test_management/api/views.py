@@ -10,7 +10,7 @@ from django.db.models import (Count,
 from django.db.models.functions import TruncDay
 
 
-from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin,IsTeamOwnerByPropertyOrReadOnly
+from core.api.permissions import IsAdmin,IsTeamMemberOfRelatedTeam,IsCommentAuthorOrAdmin,IsTeamOwnerByPropertyOrReadOnly,IsTeamMemberOfTeamProvidedInArgs
 
 from robot_test_management.models import (TestCase,
                                           TestRun,
@@ -41,7 +41,7 @@ class TestRunCreateView(generics.CreateAPIView):
     serializer_class = TestRunSerializer
     parser_classes = [MultiPartParser]
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsTeamMemberOfTeamProvidedInArgs]
 
 
 # Testrun Views

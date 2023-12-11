@@ -47,6 +47,21 @@ class IsTeamMember(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
         return TeamMembership.objects.filter(team=obj, user=request.user).exists()
+    
+class IsTeamMemberOfTeamProvidedInArgs(permissions.BasePermission):
+    
+    def has_permission(self, request, view):
+        team_id = request.data.get('team')
+        if not team_id:
+            return False
+
+        try:
+            team = Team.objects.get(id=team_id)
+        except Team.DoesNotExist:
+            return False
+
+        return TeamMembership.objects.filter(team=team, user=request.user).exists()
+
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

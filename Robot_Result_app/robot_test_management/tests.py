@@ -14,10 +14,25 @@ class TestRunCreateViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username='testuser',email='user1@example.com', password='password123')
+        self.user2 = User.objects.create_user(username='testuser2',email='user12@example.com', password='password123')
         self.client.force_authenticate(user=self.user)
         self.team = Team.objects.create(name='Test Team',owner=self.user)
+        self.team2 = Team.objects.create(name='Test Team 2',owner=self.user2)
+        TeamMembership.objects.create(team=self.team2, user=self.user2, is_maintainer=False)
         TeamMembership.objects.create(team=self.team, user=self.user)
         self.url = reverse('testrun_upload')  
+
+    def test_create_test_run_wrong_team(self):
+        with open('test_data/output_2.xml', 'rb') as file:
+            data = {
+                'output_file': file,
+                'team': self.team2.id,
+                'attributes': json.dumps({}),
+                'is_public': False
+            }
+            response = self.client.post(self.url, data, format='multipart')
+            print(response)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_test_run_success(self):
         with open('test_data/output_2.xml', 'rb') as file:
