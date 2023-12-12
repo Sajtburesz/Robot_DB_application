@@ -158,7 +158,7 @@ export default {
     };
   },
   created() {
-    this.loadTestRun();
+    this.loadTestRun(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`);
   },
   computed: {
     isNotPublic() {
@@ -200,6 +200,12 @@ export default {
       this.originalTestRun = null;
       this.editMode = false;
     },
+    extractPath(url) {
+      if (!url) return null;
+      const basePath = '/api/v1/';
+      const index = url.indexOf(basePath);
+      return index !== -1 ? url.substring(index) : null;
+    },
     async saveTestRunDetails() {
       try {
         await axios.put(`/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`, this.testRun);
@@ -215,13 +221,13 @@ export default {
         this.$toast.error(`Error during deleting testrun.`);
       }
     },
-    async loadTestRun(url = `/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/`) {
+    async loadTestRun(url) {
       try {
         const response = await axios.get(url);
         this.testRun = response.data;
         this.suites = this.testRun.suites.suites;
-        this.nextSuitesUrl = this.testRun.suites.next;
-        this.prevSuitesUrl = this.testRun.suites.previous;
+        this.nextSuitesUrl = this.extractPath(response.data.suites.next);
+        this.prevSuitesUrl = this.extractPath(response.data.suites.previous);
         if (this.teamId !== 'public'){
           this.fetchRole();
         }
