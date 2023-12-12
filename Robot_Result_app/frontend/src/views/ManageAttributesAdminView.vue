@@ -40,7 +40,7 @@
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="attributeDeleteModal">
+        <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="attributeDeleteModal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

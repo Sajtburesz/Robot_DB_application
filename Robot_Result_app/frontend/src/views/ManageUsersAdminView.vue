@@ -76,7 +76,7 @@
                             </div>
                         </div>
                         <!-- User Delete Confirmation Modal -->
-                        <div v-if="userForDeletion" class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="userDeleteModal">
+                        <div v-if="userForDeletion" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="userDeleteModal">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -96,7 +96,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="adminManagementInfo" class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="manageAdminModal">
+                        <div v-if="adminManagementInfo" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="manageAdminModal">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
