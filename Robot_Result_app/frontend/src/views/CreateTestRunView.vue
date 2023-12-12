@@ -92,7 +92,7 @@ export default {
             while (url) {
                 const response = await axios.get(url);
                 allTeams = allTeams.concat(response.data.results.map(team => ({ id: team.id, name: team.name })));
-                url = response.data.next;
+                url = this.extractPath(response.data.next);
             }
             this.teams = allTeams;
             this.filteredTeams = this.teams;
@@ -106,6 +106,12 @@ export default {
     },
 
     methods: {
+        extractPath(url) {
+            if (!url) return null;
+            const basePath = '/api/v1/';
+            const index = url.indexOf(basePath);
+            return index !== -1 ? url.substring(index) : null;
+        },
         handleFileUpload() {
             this.uploadedFile = this.$refs.fileInput.files[0];
         },

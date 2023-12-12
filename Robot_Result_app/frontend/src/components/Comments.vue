@@ -60,6 +60,12 @@ export default {
         this.loadComments();
     },
     methods: {
+        extractPath(url) {
+            if (!url) return null;
+            const basePath = '/api/v1/';
+            const index = url.indexOf(basePath);
+            return index !== -1 ? url.substring(index) : null;
+        },
         async loadComments(url = `/api/v1/teams/${this.teamId}/test-runs/${this.testRunId}/comments/`) {
             this.loading = true;
             try {
@@ -69,9 +75,11 @@ export default {
                     ...comment,
                     canEdit: comment.author === currentUser
                 }));
+                let next = this.extractPath(response.data.next);
+                let prev = this.extractPath(response.data.previous);
                 this.pagination = {
-                    next: response.data.next,
-                    previous: response.data.previous
+                    next: next,
+                    previous: prev
                 };
             }
             catch (error) {

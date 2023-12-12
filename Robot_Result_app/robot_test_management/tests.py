@@ -31,7 +31,6 @@ class TestRunCreateViewTest(TestCase):
                 'is_public': False
             }
             response = self.client.post(self.url, data, format='multipart')
-            print(response)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_test_run_success(self):

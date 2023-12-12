@@ -170,11 +170,17 @@ export default {
         }
     },
     methods: {
+        extractPath(url) {
+            if (!url) return null;
+            const basePath = '/api/v1/';
+            const index = url.indexOf(basePath);
+            return index !== -1 ? url.substring(index) : null;
+        },
         async fetchUsers(url) {
             try {
                 const response = await axios.get(url + (this.filterQuery ? `?username=${this.filterQuery}` : ''));
-                this.nextUrl = response.data.next;
-                this.prevUrl = response.data.previous;
+                this.nextUrl = this.extractPath(response.data.next);
+                this.prevUrl = this.extractPath(response.data.previous);
                 this.users = response.data.results.map(user => ({ ...user, isExpanded: false }));
             } catch (error) {
                 this.$toast.error(`Error fetching users.`);

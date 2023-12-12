@@ -123,6 +123,12 @@ export default {
     }
   },
   methods: {
+    extractPath(url) {
+      if (!url) return null;
+      const basePath = '/api/v1/';
+      const index = url.indexOf(basePath);
+      return index !== -1 ? url.substring(index) : null;
+    },
     async fetchTeams() {
       try {
         const user = await axios.get('/auth/users/me/');
@@ -131,7 +137,7 @@ export default {
         while (url) {
           const response = await axios.get(url);
           allTeams = allTeams.concat(response.data.results.map(team => ({ id: team.id, name: team.name })));
-          url = response.data.next;
+          url = this.extractPath(response.data.next);
         }
         this.teams = allTeams;
         this.filteredTeams = this.teams;
@@ -149,8 +155,8 @@ export default {
       try {
         const response = await axios.get(url);
         this.testRuns = response.data.results.map(tr => ({ ...tr, showAllAttributes: false }));
-        this.nextPageUrl = response.data.next;
-        this.previousPageUrl = response.data.previous;
+        this.nextPageUrl = this.extractPath(response.data.next);
+        this.previousPageUrl = this.extractPath(response.data.previous);
 
       } catch (error) {
         this.$toast.error(`Error during fetching test runs.`);

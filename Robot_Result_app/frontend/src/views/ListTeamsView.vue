@@ -64,19 +64,25 @@ export default {
 
         const response = await axios.get("/api/v1/users/" + username.data.username + "/teams/");
 
-        this.nextUrl = response.data.next;
-        this.prevUrl = response.data.previous;
+        this.nextUrl = this.extractPath(response.data.next);
+        this.prevUrl = this.extractPath(response.data.previous);
         
         this.teams = response.data.results;
 
     },
     methods: {
+        extractPath(url) {
+          if (!url) return null;
+          const basePath = '/api/v1/';
+          const index = url.indexOf(basePath);
+          return index !== -1 ? url.substring(index) : null;
+        },
         async getPaginatedList(url) {
 
             const response = await axios.get(url);
 
-            this.nextUrl = response.data.next;
-            this.prevUrl = response.data.previous;
+            this.nextUrl = this.extractPath(response.data.next);
+            this.prevUrl = this.extractPath(response.data.previous);
 
             this.teams = response.data.results;
         },
